@@ -6,7 +6,7 @@ library(jtools)
 library(forcats)
 library(survminer)
 library(forestplot)
-
+library(ggh4x) # extends ggplot 
 
 # import results tables
 predicted_greentotal_results <- read.csv("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/results/predictedgreentotalforplots_sm.csv")
@@ -34,9 +34,9 @@ predicted_greentotal_results$edu_num <- factor(predicted_greentotal_results$edu_
                                                          "Bachelor's Degree or higher"))
 
 predicted_greentotal_results$depr_num <- factor(predicted_greentotal_results$depr_num, levels = c(1,2,3), 
-                                                labels=c("Least deprived neighborhood", 
-                                                         "Moderately deprived neighborhood",
-                                                         "Most deprived neighborhood"))  
+                                                labels=c("Least", 
+                                                         "Moderate",
+                                                         "Most"))  
 head(predicted_greentotal_results)
 
 ########################
@@ -49,8 +49,34 @@ results_REN_totalgreen<-data.frame(strata_REN_totalgreen,ES_REN_totalgreen,LCI_R
 results_REN_totalgreen$strata_REN_totalgreen<-factor(results_REN_totalgreen$strata_REN_totalgreen)
 
 #colnames (table_plot_carrier) <-c("Model", "Estimate", "LowerLevel", "UpperLevel", "result", "ApoE4", "Outcome", "Status")
-colnames (predicted_greentotal_results) <-c("Strata", "RaceEthnicity", "EducationLevel", "Depr", "Estimate", "LowerLevel", "UpperLevel")
+colnames (predicted_greentotal_results) <-c("Strata", "RaceEthnicity", "EducationLevel", "Deprivation", "Estimate", "LowerLevel", "UpperLevel")
 head(predicted_greentotal_results)
+test_plot1 <- ggplot(data=predicted_greentotal_results, aes(x = Strata, y = Estimate, ymin=LowerLevel, ymax=UpperLevel))+
+  geom_pointrange(aes (color = EducationLevel)) + geom_errorbar(aes (color = EducationLevel)) 
+test_plot1 # works but not there yet
+
+test_plot2 <- ggplot(data=predicted_greentotal_results, aes(x = Strata, y = Estimate, ymin=LowerLevel, ymax=UpperLevel))+
+  geom_pointrange(aes (color = EducationLevel)) + geom_errorbar(aes (color = EducationLevel)) + 
+  facet_nested(~ RaceEthnicity + EducationLevel)
+test_plot2 # this gets me the nested facets, now need to sort what the x should be instead of strata
+
+test_plot3 <- ggplot(data=predicted_greentotal_results, aes(x = Depr, y = Estimate, ymin=LowerLevel, ymax=UpperLevel))+
+  geom_pointrange(aes (color = EducationLevel)) + geom_errorbar(aes (color = EducationLevel)) + 
+  facet_nested(~ RaceEthnicity + EducationLevel)
+test_plot3 # this gets me what I want, but need to change angles of x labels and drop the legend
+
+test_plot4 <- ggplot(data=predicted_greentotal_results, aes(x = Deprivation, y = Estimate, ymin=LowerLevel, ymax=UpperLevel))+
+  geom_pointrange(aes (color = EducationLevel)) + geom_errorbar(aes (color = EducationLevel)) + 
+  facet_nested(~ RaceEthnicity + EducationLevel) + theme(axis.text.x = element_text(size = 8, angle = 90, vjust = 0.5, hjust=1))+
+  theme(legend.position = "none")
+  test_plot4
+  
+test_plot5 <- ggplot(data=predicted_greentotal_results, aes(x = Deprivation, y = Estimate, ymin=LowerLevel, ymax=UpperLevel))+
+    geom_pointrange(aes (color = EducationLevel)) + geom_errorbar(aes (color = EducationLevel)) + 
+    facet_nested(~ RaceEthnicity + EducationLevel) + theme(axis.text.x = element_text(size = 8, angle = 90, vjust = 0.5, hjust=1))+
+    theme(legend.position = "none")
+test_plot5
+
 
 g1<-ggplot(data=table_plot_carrier, aes(x = Outcome, y = Estimate, col=ApoE4))+
   geom_line(aes(linetype = ApoE4), size=0.5, position = pd)+
