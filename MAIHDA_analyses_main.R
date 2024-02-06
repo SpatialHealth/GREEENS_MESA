@@ -23,64 +23,28 @@ gsv_mesa <- read.csv("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEEN
 head(gsv_mesa,20)
 dim(gsv_mesa) # 6814
 
-###check for what needs converting to factors
-is.factor(gsv_mesa$race1c)
-is.factor(gsv_mesa$gender1)
-is.factor(gsv_mesa$educ_3cat)
-is.factor(gsv_mesa$f1_pc2_3cat)
-is.factor(gsv_mesa$site4c)
-is.factor(gsv_mesa$site1c)
-is.factor(gsv_mesa$income1)
-#gsv_mesa$race1c <- factor(gsv_mesa$race1c)
-#gsv_mesa$gender1 <- factor(gsv_mesa$gender1)
-#gsv_mesa$educ_3cat <- factor(gsv_mesa$educ_3cat)
-#gsv_mesa$f1_pc2_3cat <- factor(gsv_mesa$f1_pc2_3cat)
-#sv_mesa$site4c <- factor(gsv_mesa$site4c)
-#sv_mesa$site1c <- factor(gsv_mesa$site1c)
-#gsv_mesa$income1 <- factor(gsv_mesa$income1)
-summary(gsv_mesa$race1c)
-summary(gsv_mesa$educ_3cat)
-summary(gsv_mesa$gender1)
-summary(gsv_mesa$site4c)
-
-gsv_mesa$race1c <- factor(gsv_mesa$race1c, levels=c(1,2,3,4),
-                      labels=c("White", 
-                               "Chinese American",
-                               "Black",
-                               "Hispanic"))
-
-gsv_mesa$educ_3cat <- factor(gsv_mesa$educ_3cat, levels = c(1,2,3), 
-                       labels = c("High School or less", 
-                                  "Some college", 
-                                  "Bachelor's Degree or higher"))
-
-gsv_mesa$f1_pc2_3cat <- factor(gsv_mesa$f1_pc2_3cat, levels = c(1,2,3), 
-                           labels=c("Least deprived neighborhood", 
-                                    "Moderately deprived neighborhood",
-                                    "Most deprived neighborhood"))
-
-
-gsv_mesa$gender1 <- factor(gsv_mesa$gender1, levels = c(0,1), 
-                       labels = c("Female", "Male"))
-
-gsv_mesa$income1 <- factor(gsv_mesa$income1, levels = 1:13, 
-                       labels = c("< $5,000", "$5,000-$7,999", "$8,000-$11,999", "$12,000-$15,999", "$16,000-$19,999", "$20,000-$24,999", "$25,000-$29,999", "$30,000-$34,999", "$35,000-$39,999", "$40,000-$49,000", "$50,000-$74,999", "$75,000-$99,999", "$100,000 +"))
-
-gsv_mesa$site4c <- factor(gsv_mesa$site4c, levels = c(3,4,5,6,7,8), 
-                       labels = c("WFU", "COL", "JHU", "UMN", "NWU", "UCLA"))
-
-
+###set cat vars to factors 
+gsv_mesa$race1c <- factor(gsv_mesa$race1c)
+gsv_mesa$gender1 <- factor(gsv_mesa$gender1)
+gsv_mesa$educ_3cat <- factor(gsv_mesa$educ_3cat)
+gsv_mesa$f1_pc2_3cat <- factor(gsv_mesa$f1_pc2_3cat)
+gsv_mesa$site4c <- factor(gsv_mesa$site4c)
+gsv_mesa$income1 <- factor(gsv_mesa$income1)
 
 
 ###subset for non-missing race x edu x f1_pc2 
 gsv_mesa_noNAedu_f1pc2 <- gsv_mesa %>% 
+  filter(!is.na(race1c)) %>%
   filter(!is.na(educ_3cat)) %>% # subset to non-missing edu & f1_pc2 for race/eth x edu x f1_pc2 strata
   filter(!is.na(f1_pc2_3cat))
 dim(gsv_mesa_noNAedu_f1pc2) # 5536
 
 gsv_mesa_noNAedu_f1pc2_sm <- gsv_mesa_noNAedu_f1pc2 %>% select(idno, race1c, educ_3cat, f1_pc2_3cat,
-                                                               age1c, gender1, income1, year, green_total, 
-                                                               tree_total, green_other, grass_500, site1c, site4c)
+                                                               age1c, agecat1c, gender1, income1, income_3cat, year, green_total, 
+                                                               tree_total, green_other, grass_500, site1c, site4c, F1_PC2)
+
+
+
 
 # step 1 intersectional strata & size checks #################
 ### 1a. create intersectional strata ######################################
@@ -300,6 +264,12 @@ round(0.0484/ (0.0484 + 0.5929)*100,2) # 7.55%
 # https://www.andrewheiss.com/blog/2021/11/10/ame-bayes-re-guide/ 
 # https://paul-buerkner.github.io/brms/reference/predictive_interval.brmsfit.html
 
+pred.means.model1_race_edu_f1_greentotal <- model1_race_edu_f1_greentotal %>% 
+  epred_draws(race_edu_f1_tert_strata) %>% 
+  group_by(strata) %>% 
+  mean_qi(.epred) # 
+View(pred.means.model1_race_edu_f1_greentotal)
+
 ### 4b. % trees only -------
 pred.means.model1_race_edu_f1_trees <- model1_race_edu_f1_trees %>% 
   epred_draws(race_edu_f1_tert_strata) %>% 
@@ -321,5 +291,24 @@ pred.means.model1_race_edu_f1_green_other <- model1_race_edu_f1_green_other %>%
   mean_qi(.epred) # 
 View(pred.means.model1_race_edu_f1_green_other)
 
+
+
+#
+#
+#
+# ### this all is for later
+# Expected average greenness per strata
+expected.means.model1_race_edu_f1_greentotal <- model1_race_edu_f1_greentotal %>%
+  epred_draws(race_edu_f1_tert_strata, re_formula = NA) %>% 
+  group_by(strata) %>% 
+  mean_qi(.epred)
+
+View(expected.means.model1_race_edu_f1_greentotal)
+
+# Check whether difference between predicted and expected values equals random effects
+show2 <- cbind(pred.means.model1_race_edu_f1_greentotal$.value, expected.means.model1_race_edu_f1_greentotal$.value, bayes.random.effects.new$Estimate.Intercept)
+show2 <- as.data.frame(show2)
+show2$diff <- show2$V1 - show2$V2
+View(show2) # difference equals random effects
 
 
