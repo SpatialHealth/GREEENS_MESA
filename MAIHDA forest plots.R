@@ -80,71 +80,8 @@ test_plot5 <- ggplot(data=predicted_greentotal_results, aes(x = Deprivation, y =
   labs(title = "Figure 3. Predicted mean percent total greenness with 95% credible intervals across intersectional strata \nin the simple intersectional model", 
        x = "Neighborhood Deprivation", y = "% Total Street View Greenness") 
   
-test_plot5 
+test_plot5 # this is the current best plot
 
 
-
-###depriv nested in edu level nested in race/eth at top--------
-
-
-
-g1<-ggplot(data=table_plot_carrier, aes(x = Outcome, y = Estimate, col=ApoE4))+
-  geom_line(aes(linetype = ApoE4), size=0.5, position = pd)+
-  geom_point(aes(col = factor(ApoE4)), size=2.5, position = pd)+
-  geom_errorbar(aes(ymin=LowerLevel, ymax=UpperLevel, linetype=ApoE4, col=ApoE4), size=0.8, position = pd)+
-  xlab('')+
-  ylim(-0.02, 0.06) +
-  geom_hline(yintercept =0, linetype=1)+
-  theme_bw() + 
-  scale_colour_manual(values=cols) +
-  theme(axis.text.x=element_blank(),
-        axis.title.y=element_blank(),
-        legend.position = "right")
-g1
-
-fp_totalgreen <- ggplot(data=predicted_greentotal_results, aes(x = Strata, y = Estimate))+
-  geom_hline(yintercept=0, size =1, colour="gray90") + # add lines at tick marks
-  geom_hline(yintercept=10, size =1, colour="gray90") + # add lines at tick marks
-  geom_hline(yintercept=20, size =1, colour="gray90") + # add lines at tick marks
-  geom_hline(yintercept=30, size =1, colour="gray90") + # add lines at tick marks
-  geom_hline(yintercept=40, size =1, colour="gray90") + # add lines at tick marks
-  geom_hline(yintercept=50, size =1, colour="gray90") + # add lines at tick marks
-  geom_pointrange() + # creates the whiskers 
-  geom_point(size = 3, shape=23) +
-  geom_errorbar(aes(ymin=LCI_REN_totalgreen, ymax=UCI_REN_totalgreen), width=0.2, cex=0.5)+ # Makes whiskers on the range (more aesthetically pleasing)
-  #scale_colour_brewer(palette = "Dark2") +
-  labs(title="Figure 1. Association of Intersecting Strata of Race/Ethnicity, Education & Neighborhood Deprivation \n with Baseline Google Street View Measures of Greenspace.\nMESA (N=5264)") +
-  labs(color='Strata')+
-  xlab("") + # Label on the Y axis (flipped specification due to coord_flip)
-  ylab("Mean Estimates of % Total GSV Greenspace + 95% CI") + # Label on the X axis (flipped specification due to coord_flip)
-  scale_y_continuous(limits = c(0,50), breaks = c(0,10,20,30,40,50))+ # limits and tic marks on X axis (flipped specification do to coord_flip)
-  theme(strip.background = element_rect(fill="gray90"), 
-        legend.position ="right", 
-        axis.text.y=element_blank(),
-        axis.line.x = element_line(colour = "black"), 
-        axis.line.y = element_blank(), 
-        panel.border= element_blank(), 
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(), 
-        panel.background = element_blank(), 
-        text=element_text(size=10),
-        plot.title = element_text(face = "bold"),
-        axis.ticks = element_blank())
-fp_REN_totalgreen
-
-
-g1<-ggplot(data=table_plot_carrier, aes(x = Outcome, y = Estimate, col=ApoE4))+
-  geom_line(aes(linetype = ApoE4), size=0.5, position = pd)+
-  geom_point(aes(col = factor(ApoE4)), size=2.5, position = pd)+
-  geom_errorbar(aes(ymin=LowerLevel, ymax=UpperLevel, linetype=ApoE4, col=ApoE4), size=0.8, position = pd)+
-  xlab('')+
-  ylim(-0.02, 0.06) +
-  geom_hline(yintercept =0, linetype=1)+
-  theme_bw() + 
-  scale_colour_manual(values=cols) +
-  theme(axis.text.x=element_blank(),
-        axis.title.y=element_blank(),
-        legend.position = "right")
-g1
 
 
