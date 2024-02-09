@@ -1,4 +1,4 @@
-# GREEENS project MAIHDA models proof-of-concept coding-------------------------
+# GREEENS project MAIHDA models coding-------------------------
 # Author: Tara Jenson
 # Created: 11/27/2023
 # Last Edited: 12/16/2023
@@ -9,6 +9,7 @@ library(brm)
 library(brms)
 library(tidybayes)
 library(WriteXLS)
+library(rcompanion)
 
 
 ##### Setup/run MAIHDA models to assess relationship and interaction
@@ -55,10 +56,17 @@ head(race_edu_f1_tert_strata,50)
 range(race_edu_f1_tert_strata$strata) # 1-36 as expected for race/eth x edu strata
 
 out_dir <- "/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/data/"
+readr::write_csv(x = race_edu_f1_tert_strata, 
+                file = paste0(out_dir, "race_edu_f1_tert_strata.csv"), 
+                num_threads = 3,) 
 
 readr::write_csv(x = race_edu_f1_tert_strata, 
-                 file = paste0(out_dir, "race_edu_f1_tert_strata.csv"), 
+                 file = paste0(out_dir, "race_edu_f1_tert_strata_forSAS.csv"), 
                  num_threads = 3, na=".") # adding option param to change NA to.
+
+######## testing out doing normal score transformation of  the greenness measures to use in models
+race_edu_f1_tert_strata$green_totalNST = blom(race_edu_f1_tert_strata$green_total)
+# use green_totalNST in the model instead
 
 ### 1b. Check that sample sizes are sufficiently large #########################
 total.number.strata <- 36 # num strata we have for race x edu x f1
@@ -84,6 +92,26 @@ model1_race_edu_f1_greentotal <- brm(green_total~1+age1c+gender1+income1+site4c+
                                      chains=1, seed=123)
 
 model1_race_edu_f1_greentotal
+
+# trying out with normal-transformed green_totalNST 
+model1_race_edu_f1_greentotalNST <- brm(green_totalNST~1+age1c+gender1+income1+site4c+(1|strata),
+                                     data = race_edu_f1_tert_strata,
+                                     warmup = 5000,
+                                     iter = 10000,
+                                     chains=1, seed=123)
+
+model1_race_edu_f1_greentotalNST # yeah runs but the values of of distrib, and thus the estimates, are entirely diff
+
+# trying out with log-normal, link identity 
+model1_race_edu_f1_greentotal_ln <- brm(green_total~1+age1c+gender1+income1+site4c+(1|strata),
+                                        data = race_edu_f1_tert_strata,
+                                        family = "lognormal",
+                                        warmup = 5000,
+                                        iter = 10000,
+                                        chains=1, seed=123)
+
+model1_race_edu_f1_greentotal_ln # it ran....but pretty close to same as with normal transformed
+                                # Exponentiating estimates leave me with way smaller variances than with my orig model
 
 
 # Check plots
