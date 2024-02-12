@@ -21,6 +21,15 @@ hist(maindata$tree_total)  # normalish, right skewed
 hist(maindata$grass_500) # not normal 
 hist(maindata$green_other) 
 
+ggplot(maindata, aes(x=green_total)) +
+  geom_density(fill="darkgreen")
+ggplot(maindata, aes(x=tree_total)) +
+  geom_density(fill="forestgreen")
+ggplot(maindata, aes(x=grass_500)) +
+  geom_density(fill="green")
+ggplot(maindata, aes(x=green_other)) +
+  geom_density(fill="lightgreen")
+
 qqnorm(maindata$green_total, main='Normal') 
 qqline(maindata$green_total)
 
