@@ -10,6 +10,7 @@ library(brms)
 library(tidybayes)
 library(WriteXLS)
 library(rcompanion)
+library(extraDistr)
 
 
 ##### Setup/run MAIHDA models to assess relationship and interaction
@@ -116,6 +117,29 @@ n.strata.30/total.number.strata* 100 # 97% of strata have >30 individs
 ###     and within intersectional strata                       
 ###     --> include age, sex, income, site as covars
 
+### 2a.0 decide how to set priors - just trying this out -----------
+### https://vasishth.github.io/bayescogsci/book/ch-reg.html#likelihood-and-priors
+### Greenness measures cannot be negative (can be 0), or >100
+# setting plausible priors
+summary(race_edu_depr_strata$green_total)
+#    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+#   1.37   13.76   26.30   25.75   34.95   69.49      88 
+# set alpha = normal(50,25)
+qnorm(c(.025, .975), mean = 50, sd = 25) # 1.0009 98.9991
+
+# uninformed prior for σ
+# σ ∼Normal+  (0,1000) 
+qtnorm(c(.025, .975), mean = 0, sd = 50, a = 0) # in extraDistr pkg
+# 1.566899 112.070136
+
+# prior for B
+# B ~normal() - skip this for now
+prior = c(
+  prior(normal(1000, 500), class = Intercept),
+  prior(normal(0, 1000), class = sigma),
+  prior(normal(0, 100), class = b, coef = c_load)
+)
+
 ### 2a.i: % total greenness, Simple intersectional  -----------------------------------------
 ### Bayesian MLM for simple intersectional model 
 model1_race_edu_f1_greentotal <- brm(green_total~1+age1c+gender1+income1+site4c+(1|strata),
@@ -125,6 +149,20 @@ model1_race_edu_f1_greentotal <- brm(green_total~1+age1c+gender1+income1+site4c+
                                      chains=1, seed=123)
 
 model1_race_edu_f1_greentotal
+
+#trying out with setting priors
+model1_race_edu_f1_greentotal_priors <- brm(green_total~1+age1c+gender1+income1+site4c+(1|strata),
+                                     data = race_edu_depr_strata,
+                                     warmup = 5000,
+                                     iter = 10000,
+                                     chains=1, seed=123,
+                                     prior = c(
+                                       prior(normal(50, 25), class = Intercept),
+                                       prior(normal(0, 50), class = sigma)
+                                       )
+                                     )
+
+model1_race_edu_f1_greentotal_priors # no change to the estimates
 
 # trying out with normal-transformed green_totalNST 
 #model1_race_edu_f1_greentotalNST <- brm(green_totalNST~1+age1c+gender1+income1+site4c+(1|strata),
@@ -149,6 +187,8 @@ model1_race_edu_f1_greentotal
 
 # Check plots
 plot(model1_race_edu_f1_greentotal, variable = "^b", regex = TRUE)
+plot(model1_race_edu_f1_greentotal)
+
 
 # Check Gelman-Rubin convergence diagnostic (Rhat value should be lower than 1.1/1.05 for good convergence)
 model1_race_edu_f1_greentotal.rhats <- round(as.numeric(model1_race_edu_f1_greentotal$rhats), 2)
