@@ -54,7 +54,11 @@ head(maindata)
 maindata <- maindata %>% 
   mutate(green_total_sqrd =green_total^2) %>% 
   mutate(green_total_sqrt = sqrt(green_total)) %>% 
-  mutate(greent_total_log = log(green_total))
+  mutate(greent_total_log = log(green_total)) %>% 
+  mutate(green_totalNST = blom(green_total))
+
+ggplot(maindata, aes(x=green_totalNST)) +
+  geom_density(fill="yellowgreen")
 
 head(maindata,20)
 

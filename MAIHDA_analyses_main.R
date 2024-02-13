@@ -171,7 +171,7 @@ model1_race_edu_f1_greentotal_priors # no change to the estimates
 #                                     iter = 10000,
 #                                     chains=1, seed=123)
 
-#model1_race_edu_f1_greentotalNST # yeah runs but the values of of distrib, and thus the estimates, are entirely diff
+#model1_race_edu_f1_greentotalNST # yeah runs but the values of distrib, and thus the estimates, are entirely diff
 
 # trying out with log-normal, link identity 
 #model1_race_edu_f1_greentotal_ln <- brm(green_total~1+age1c+gender1+income1+site4c+(1|strata),
