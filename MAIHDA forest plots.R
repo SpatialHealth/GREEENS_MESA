@@ -208,50 +208,59 @@ test_plot5 # this is the current best plot
 ## Figure 3 a, b, c & d -------
 greentotal <- ggplot(data=predicted_greentotal_results, aes((reorder(x = Deprivation, desc(Deprivation))), y = Estimate, ymin=LowerLevel, ymax=UpperLevel))+
   geom_pointrange(aes (color = EducationLevel), size=0.1) + geom_errorbar(aes (color = EducationLevel)) + 
+  ylim(-2, 46) +
   scale_color_manual(values=c("darkred", "darkseagreen4", "steelblue4"))+
   facet_nested(~ RaceEthnicity + EducationLevel, nest_line = TRUE) + 
   theme_bw()+ # sets white background with gray grid marks
   theme(legend.position = "none", axis.text.x = element_text(size = 8, angle = 90, vjust = 0.5, hjust=1))+ # no legend, sets x-axis text size and angle
   theme(strip.background = element_rect(colour = "black", linewidth = 1)) + # creates rectangle around nested var labels
-  labs(title = "Figure 3. Predicted mean percent street-view of measures of greenness with 95% credible intervals across
-  intersectional strata in the simple intersectional model.", 
-       x = "Neighborhood Deprivation", y = "% Total Street View Greenness") 
+  theme(plot.title = element_text(face = "bold")) +
+  labs(title = "Figure 2. Predicted mean percent street-view of measures of greenness with 95% credible intervals across
+intersectional strata in the simple intersectional model.
+A.", 
+       x = "Neighborhood Deprivation", y = "% Predicted Total Greenness") 
 
 greentotal 
 
 treesonly <- ggplot(data=predicted_treesonly_results, aes((reorder(x = Deprivation, desc(Deprivation))), y = Estimate, ymin=LowerLevel, ymax=UpperLevel))+
   geom_pointrange(aes (color = EducationLevel), size=0.1) + geom_errorbar(aes (color = EducationLevel)) + 
+  ylim(-2, 46) +
   scale_color_manual(values=c("darkred", "darkseagreen4", "steelblue4"))+
   facet_nested(~ RaceEthnicity + EducationLevel, nest_line = TRUE) + 
   theme_bw()+ # sets white background with gray grid marks
   theme(legend.position = "none", axis.text.x = element_text(size = 8, angle = 90, vjust = 0.5, hjust=1))+ # no legend, sets x-axis text size and angle
   theme(strip.background = element_rect(colour = "black", linewidth = 1)) + # creates rectangle around nested var labels
+  theme(plot.title = element_text(face = "bold")) +
   labs(title = "B.", 
-       x = "Neighborhood Deprivation", y = "% Street View Trees") 
+       x = "Neighborhood Deprivation", y = "% Predicted Trees") 
 
 treesonly 
 
 grassonly <- ggplot(data=predicted_grassonly_results, aes((reorder(x = Deprivation, desc(Deprivation))), y = Estimate, ymin=LowerLevel, ymax=UpperLevel))+
   geom_pointrange(aes (color = EducationLevel), size=0.1) + geom_errorbar(aes (color = EducationLevel)) + 
+  ylim(-2, 46) +
   scale_color_manual(values=c("darkred", "darkseagreen4", "steelblue4"))+
   facet_nested(~ RaceEthnicity + EducationLevel, nest_line = TRUE) + 
   theme_bw()+ # sets white background with gray grid marks
   theme(legend.position = "none", axis.text.x = element_text(size = 8, angle = 90, vjust = 0.5, hjust=1))+ # no legend, sets x-axis text size and angle
   theme(strip.background = element_rect(colour = "black", linewidth = 1)) + # creates rectangle around nested var labels
+  theme(plot.title = element_text(face = "bold")) +
   labs(title = "C.", 
-       x = "Neighborhood Deprivation", y = "% Street View Grass") 
+       x = "Neighborhood Deprivation", y = "% Predicted Grass") 
 
 grassonly 
 
 greenother <- ggplot(data=predicted_greenother_results, aes((reorder(x = Deprivation, desc(Deprivation))), y = Estimate, ymin=LowerLevel, ymax=UpperLevel))+
   geom_pointrange(aes (color = EducationLevel), size=0.1) + geom_errorbar(aes (color = EducationLevel)) + 
+  ylim(-2, 46) +
   scale_color_manual(values=c("darkred", "darkseagreen4", "steelblue4"))+
   facet_nested(~ RaceEthnicity + EducationLevel, nest_line = TRUE) + 
   theme_bw()+ # sets white background with gray grid marks
   theme(legend.position = "none", axis.text.x = element_text(size = 8, angle = 90, vjust = 0.5, hjust=1))+ # no legend, sets x-axis text size and angle
   theme(strip.background = element_rect(colour = "black", linewidth = 1)) + # creates rectangle around nested var labels
+  theme(plot.title = element_text(face = "bold")) +
   labs(title = "D.", 
-       x = "Neighborhood Deprivation", y = "% Street View Other Greennes") 
+       x = "Neighborhood Deprivation", y = "% Predicted Other Greennes") 
 
 greenother
 
