@@ -50,7 +50,6 @@ gsv_mesa$n_depr <- factor(gsv_mesa$n_depr)
 gsv_mesa$site4c <- factor(gsv_mesa$site4c)
 gsv_mesa$income1 <- factor(gsv_mesa$income1)
 
-
 ###subset for non-missing race x edu x f1_pc2 
 gsv_mesa_noNArace_edu_depr <- gsv_mesa %>% 
   filter(!is.na(race1c)) %>%

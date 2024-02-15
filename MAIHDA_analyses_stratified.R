@@ -1,3 +1,8 @@
+# GREEENS project: MAIHDA analyses - stratifying models by popn density -------------------------
+# Author: Tara Jenson
+# Created: 2/8/2024
+# Last Edited: 
+
 library(haven)
 library(tidyverse)
 
