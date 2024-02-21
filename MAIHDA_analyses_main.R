@@ -23,10 +23,36 @@ setwd("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Gr
 ###Read in combined GSV-Mesa data file 
 gsv_mesa <- read.csv("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/data/gsv_demo_census_2007.csv")
 head(gsv_mesa,20)
-dim(gsv_mesa) # 6814
+dim(gsv_mesa) # 6814 | 35
+glimpse(gsv_mesa)
+
+
+###recode other green to include flowers_500
+###field_500 + flowers_500 + plant_500
+summary(gsv_mesa$green_other)
+#    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+#   0.020   0.550   0.860   1.003   1.240  18.020     314 
+gsv_mesa %>% 
+  summarize(n=n(green_other))
+sum(is.na(gsv_mesa$green_other)) # 314 missing from orig coded other_green
+
+gsv_mesa <- gsv_mesa %>% 
+  select(-green_other)
+dim(gsv_mesa) # 6814 | 34
+
+gsv_mesa <- gsv_mesa %>%
+  mutate(green_other = flowers_500 + field_500 + plant_500)
+
+dim(gsv_mesa)
+sum(is.na(gsv_mesa$green_other))
+summary(gsv_mesa$green_other)
+# Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+# 0.020   0.560   0.860   1.005   1.250  18.020     314 
 
 ###recode nhood deprivation in reverse order so 1 --> most depr, 3--> least depr
 ###   for more logical ordering of strata in order of most to least nhood depr
+summary(gsv_mesa$F1_PC2)
+
 gsv_mesa <- gsv_mesa %>% 
   mutate(
     n_depr = case_when(
@@ -36,6 +62,10 @@ gsv_mesa <- gsv_mesa %>%
       is.na(f1_pc2_3cat) ~ NA      # if missing, stays missing
     )
   )
+
+gsv_mesa %>% 
+  select(F1_PC2, f1_pc2_3cat, n_depr) %>% 
+  head(., 20)
 
 depr_table <- table(gsv_mesa$f1_pc2_3cat,gsv_mesa$n_depr) # check the recode
 depr_table # looks good
@@ -76,17 +106,20 @@ race_edu_depr_strata <- gsv_mesa_noNArace_edu_depr_sm %>%
 head(race_edu_depr_strata,50)
 range(race_edu_depr_strata$strata) # 1-36 as expected for race/eth x edu strata
 
+race_edu_depr_strata %>% 
+  count(strata) %>% 
+  print(n=36)
+
 # compare the new strata with the flipped depr var to the old
+race_edu_depr_strata %>% 
+  select(strata, race1c, educ_3cat, n_depr, F1_PC2, f1_pc2_3cat) %>% 
+  head(., 20)
+
 strata_new_table <- table(race_edu_depr_strata$n_depr,race_edu_depr_strata$strata) # check the recode
 strata_new_table
 
 strata_old_table <- table(race_edu_depr_strata$f1_pc2_3cat,race_edu_depr_strata$strata) # check the recode
 strata_old_table # looks good
-
-strata_new_table <- race_edu_depr_strata %>% 
-  table(n_depr,strata) # check the recode
-strata_new_table
-
 
 out_dir <- "/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/data/"
 readr::write_csv(x = race_edu_depr_strata, 
@@ -98,7 +131,7 @@ readr::write_csv(x = race_edu_depr_strata,
                  num_threads = 3, na=".") # adding option param to change NA to.
 
 ######## testing out doing normal score transformation of  the greenness measures to use in models
-race_edu_depr_strata$green_totalNST = blom(race_edu_depr_strata$green_total)
+#race_edu_depr_strata$green_totalNST = blom(race_edu_depr_strata$green_total)
 # use green_totalNST in the model instead
 
 ### 1b. Check that sample sizes are sufficiently large #########################
@@ -120,24 +153,24 @@ n.strata.30/total.number.strata* 100 # 97% of strata have >30 individs
 ### https://vasishth.github.io/bayescogsci/book/ch-reg.html#likelihood-and-priors
 ### Greenness measures cannot be negative (can be 0), or >100
 # setting plausible priors
-summary(race_edu_depr_strata$green_total)
+#summary(race_edu_depr_strata$green_total)
 #    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
 #   1.37   13.76   26.30   25.75   34.95   69.49      88 
 # set alpha = normal(50,25)
-qnorm(c(.025, .975), mean = 50, sd = 25) # 1.0009 98.9991
+#qnorm(c(.025, .975), mean = 50, sd = 25) # 1.0009 98.9991
 
 # uninformed prior for σ
 # σ ∼Normal+  (0,1000) 
-qtnorm(c(.025, .975), mean = 0, sd = 50, a = 0) # in extraDistr pkg
+#qtnorm(c(.025, .975), mean = 0, sd = 50, a = 0) # in extraDistr pkg
 # 1.566899 112.070136
 
 # prior for B
 # B ~normal() - skip this for now
-prior = c(
-  prior(normal(1000, 500), class = Intercept),
-  prior(normal(0, 1000), class = sigma),
-  prior(normal(0, 100), class = b, coef = c_load)
-)
+#prior = c(
+#  prior(normal(1000, 500), class = Intercept),
+#  prior(normal(0, 1000), class = sigma),
+#  prior(normal(0, 100), class = b, coef = c_load)
+#)
 
 ### 2a.i: % total greenness, Simple intersectional  -----------------------------------------
 ### Bayesian MLM for simple intersectional model 
@@ -150,18 +183,18 @@ model1_race_edu_f1_greentotal <- brm(green_total~1+age1c+gender1+income1+site4c+
 model1_race_edu_f1_greentotal
 
 #trying out with setting priors
-model1_race_edu_f1_greentotal_priors <- brm(green_total~1+age1c+gender1+income1+site4c+(1|strata),
-                                     data = race_edu_depr_strata,
-                                     warmup = 5000,
-                                     iter = 10000,
-                                     chains=1, seed=123,
-                                     prior = c(
-                                       prior(normal(50, 25), class = Intercept),
-                                       prior(normal(0, 50), class = sigma)
-                                       )
-                                     )
+#model1_race_edu_f1_greentotal_priors <- brm(green_total~1+age1c+gender1+income1+site4c+(1|strata),
+#                                     data = race_edu_depr_strata,
+#                                     warmup = 5000,
+#                                     iter = 10000,
+#                                     chains=1, seed=123,
+#                                     prior = c(
+#                                       prior(normal(50, 25), class = Intercept),
+#                                       prior(normal(0, 50), class = sigma)
+#                                       )
+#                                     )
 
-model1_race_edu_f1_greentotal_priors # no change to the estimates
+#model1_race_edu_f1_greentotal_priors # no change to the estimates
 
 # trying out with normal-transformed green_totalNST 
 #model1_race_edu_f1_greentotalNST <- brm(green_totalNST~1+age1c+gender1+income1+site4c+(1|strata),

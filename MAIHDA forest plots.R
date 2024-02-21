@@ -13,21 +13,21 @@ library(ggh4x) # extends ggplot
 predicted_greentotal_results <- read.csv("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/results/predictedgreentotalforplots.csv")
 head(predicted_greentotal_results)
 dim(predicted_greentotal_results) 
-view(predicted_greentotal_results) # some trailing rows
+view(predicted_greentotal_results) 
 
 predicted_treesonly_results <- read.csv("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/results/predictedtreesonlyforplots.csv")
 head(predicted_treesonly_results)
 dim(predicted_treesonly_results) 
-view(predicted_treesonly_results) # some trailing columns
+view(predicted_treesonly_results) 
 
 predicted_grassonly_results <- read.csv("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/results/predictedgrassonlyforplots.csv")
 head(predicted_grassonly_results)
-dim(predicted_grassonly_results) # some trailing columns
+dim(predicted_grassonly_results) 
 view(predicted_grassonly_results)
 
 predicted_greenother_results <- read.csv("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/results/predictedgreenotherforplots.csv")
 head(predicted_greenother_results)
-dim(predicted_greenother_results) # some trailing columns
+dim(predicted_greenother_results) 
 view(predicted_greenother_results)
 
 predicted_greentotal_lowdens_results <- read.csv("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/results/predictedgreentotalforplots_lowdensity.csv")
@@ -43,32 +43,32 @@ view(predicted_greentotal_highdens_results)
 #1. Clean up and set var as factors/labels as needed  ------------------------------------------------------------------
 
 #get rid of NAs rows that ended up in there
-predicted_greentotal_results <- predicted_greentotal_results %>%
-  mutate %>% 
-  filter(!is.na(race_num))
-head(predicted_greentotal_results)
-dim(predicted_greentotal_results) 
+#predicted_greentotal_results <- predicted_greentotal_results %>%
+#  mutate %>% 
+#  filter(!is.na(race_num))
+#head(predicted_greentotal_results)
+#dim(predicted_greentotal_results) 
 
-predicted_treesonly_results <- predicted_treesonly_results %>%
-  mutate %>% 
-  filter(!is.na(race_num)) %>% 
-  select(-X, -X.1, -X.2)
-head(predicted_treesonly_results)
-dim(predicted_treesonly_results) 
+#predicted_treesonly_results <- predicted_treesonly_results %>%
+#  mutate %>% 
+#  filter(!is.na(race_num)) %>% 
+#  select(-X, -X.1, -X.2)
+#head(predicted_treesonly_results)
+#dim(predicted_treesonly_results) 
 
-predicted_grassonly_results <- predicted_grassonly_results %>%
-  mutate %>% 
-  filter(!is.na(race_num))  %>% 
-  select(-X, -X.1, -X.2)
-head(predicted_grassonly_results)
-dim(predicted_grassonly_results) 
+#predicted_grassonly_results <- predicted_grassonly_results %>%
+#  mutate %>% 
+#  filter(!is.na(race_num))  %>% 
+#  select(-X, -X.1, -X.2)
+#head(predicted_grassonly_results)
+#dim(predicted_grassonly_results) 
 
-predicted_greenother_results <- predicted_greenother_results %>%
-  mutate %>% 
-  filter(!is.na(race_num)) %>% 
-  select(-X, -X.1, -X.2)
-head(predicted_greenother_results)
-dim(predicted_greenother_results) 
+#predicted_greenother_results <- predicted_greenother_results %>%
+#  mutate %>% 
+#  filter(!is.na(race_num)) %>% 
+#  select(-X, -X.1, -X.2)
+#head(predicted_greenother_results)
+#dim(predicted_greenother_results) 
 
 ###set cat vars to factors and assign labels for levels 
 predicted_greentotal_results$race_num <- factor(predicted_greentotal_results$race_num, levels=c(1,2,3,4),
@@ -82,10 +82,8 @@ predicted_greentotal_results$edu_num <- factor(predicted_greentotal_results$edu_
                                                          "Some \ncollege", 
                                                          "Bachelor's \nor higher"))
 
-predicted_greentotal_results$depr_num <- factor(predicted_greentotal_results$depr_num, levels = c(1,2,3), 
-                                                labels=c("Least", 
-                                                         "Moderate",
-                                                         "Most"))  
+predicted_greentotal_results$depr_num <- factor(predicted_greentotal_results$depr_num, levels = c(3,2,1), 
+                                                labels=c("Least", "Moderate", "Most"))  
 head(predicted_greentotal_results)
 
 predicted_treesonly_results$race_num <- factor(predicted_treesonly_results$race_num, levels=c(1,2,3,4),
@@ -99,10 +97,8 @@ predicted_treesonly_results$edu_num <- factor(predicted_treesonly_results$edu_nu
                                                           "Some \ncollege", 
                                                           "Bachelor's \nor higher"))
 
-predicted_treesonly_results$depr_num <- factor(predicted_treesonly_results$depr_num, levels = c(1,2,3), 
-                                                labels=c("Least", 
-                                                         "Moderate",
-                                                         "Most"))  
+predicted_treesonly_results$depr_num <- factor(predicted_treesonly_results$depr_num, levels = c(3,2,1), 
+                                                labels=c("Least","Moderate", "Most"))  
 head(predicted_treesonly_results)
 
 predicted_grassonly_results$race_num <- factor(predicted_grassonly_results$race_num, levels=c(1,2,3,4),
@@ -116,10 +112,8 @@ predicted_grassonly_results$edu_num <- factor(predicted_grassonly_results$edu_nu
                                                          "Some \ncollege", 
                                                          "Bachelor's \nor higher"))
 
-predicted_grassonly_results$depr_num <- factor(predicted_grassonly_results$depr_num, levels = c(1,2,3), 
-                                               labels=c("Least", 
-                                                        "Moderate",
-                                                        "Most"))  
+predicted_grassonly_results$depr_num <- factor(predicted_grassonly_results$depr_num, levels = c(3,2,1), 
+                                               labels=c("Least",  "Moderate", "Most"))  
 head(predicted_grassonly_results)
 
 predicted_greenother_results$race_num <- factor(predicted_greenother_results$race_num, levels=c(1,2,3,4),
@@ -133,10 +127,8 @@ predicted_greenother_results$edu_num <- factor(predicted_greenother_results$edu_
                                                          "Some \ncollege", 
                                                          "Bachelor's \nor higher"))
 
-predicted_greenother_results$depr_num <- factor(predicted_greenother_results$depr_num, levels = c(1,2,3), 
-                                               labels=c("Least", 
-                                                        "Moderate",
-                                                        "Most"))  
+predicted_greenother_results$depr_num <- factor(predicted_greenother_results$depr_num, levels = c(3,2,1), 
+                                               labels=c("Least", "Moderate", "Most"))  
 head(predicted_greenother_results)
 
 # to save space just swap out for low & high density
@@ -205,11 +197,14 @@ test_plot5 <- ggplot(data=predicted_greentotal_results, aes(x = Deprivation, y =
   
 test_plot5 # this is the current best plot
 
-## Figure 3 a, b, c & d -------
+## Figure 2 a, b, c & d -------
 greentotal <- ggplot(data=predicted_greentotal_results, aes((reorder(x = Deprivation, desc(Deprivation))), y = Estimate, ymin=LowerLevel, ymax=UpperLevel))+
-  geom_pointrange(aes (color = EducationLevel), size=0.1) + geom_errorbar(aes (color = EducationLevel)) + 
-  ylim(-2, 46) +
-  scale_color_manual(values=c("darkred", "darkseagreen4", "steelblue4"))+
+  geom_pointrange(aes (color = EducationLevel, shape=EducationLevel), size=0.3) + 
+  geom_errorbar(aes (color = EducationLevel)) + 
+  geom_hline(yintercept=mean(predicted_greentotal_results$Estimate), linetype="dashed", color = "black") +
+  ylim(0, 46) +
+  #scale_color_viridis_d() +
+  scale_color_manual(values=c("lightslateblue", "skyblue4", "darkgoldenrod2"))+
   facet_nested(~ RaceEthnicity + EducationLevel, nest_line = TRUE) + 
   theme_bw()+ # sets white background with gray grid marks
   theme(legend.position = "none", axis.text.x = element_text(size = 8, angle = 90, vjust = 0.5, hjust=1))+ # no legend, sets x-axis text size and angle
@@ -223,9 +218,11 @@ A.",
 greentotal 
 
 treesonly <- ggplot(data=predicted_treesonly_results, aes((reorder(x = Deprivation, desc(Deprivation))), y = Estimate, ymin=LowerLevel, ymax=UpperLevel))+
-  geom_pointrange(aes (color = EducationLevel), size=0.1) + geom_errorbar(aes (color = EducationLevel)) + 
-  ylim(-2, 46) +
-  scale_color_manual(values=c("darkred", "darkseagreen4", "steelblue4"))+
+  geom_pointrange(aes (color = EducationLevel, shape=EducationLevel), size=0.3) + 
+  geom_errorbar(aes (color = EducationLevel)) + 
+  geom_hline(yintercept=mean(predicted_treesonly_results$Estimate), linetype="dashed", color = "black") +
+  ylim(0, 35) +
+  scale_color_manual(values=c("lightslateblue", "skyblue4", "darkgoldenrod2"))+
   facet_nested(~ RaceEthnicity + EducationLevel, nest_line = TRUE) + 
   theme_bw()+ # sets white background with gray grid marks
   theme(legend.position = "none", axis.text.x = element_text(size = 8, angle = 90, vjust = 0.5, hjust=1))+ # no legend, sets x-axis text size and angle
@@ -237,9 +234,11 @@ treesonly <- ggplot(data=predicted_treesonly_results, aes((reorder(x = Deprivati
 treesonly 
 
 grassonly <- ggplot(data=predicted_grassonly_results, aes((reorder(x = Deprivation, desc(Deprivation))), y = Estimate, ymin=LowerLevel, ymax=UpperLevel))+
-  geom_pointrange(aes (color = EducationLevel), size=0.1) + geom_errorbar(aes (color = EducationLevel)) + 
-  ylim(-2, 46) +
-  scale_color_manual(values=c("darkred", "darkseagreen4", "steelblue4"))+
+  geom_pointrange(aes (color = EducationLevel,shape=EducationLevel), size=0.3) + 
+  geom_errorbar(aes (color = EducationLevel)) + 
+  geom_hline(yintercept=mean(predicted_grassonly_results$Estimate), linetype="dashed", color = "black") +
+  ylim(-2, 15) +
+  scale_color_manual(values=c("lightslateblue", "skyblue4", "darkgoldenrod2"))+
   facet_nested(~ RaceEthnicity + EducationLevel, nest_line = TRUE) + 
   theme_bw()+ # sets white background with gray grid marks
   theme(legend.position = "none", axis.text.x = element_text(size = 8, angle = 90, vjust = 0.5, hjust=1))+ # no legend, sets x-axis text size and angle
@@ -251,9 +250,11 @@ grassonly <- ggplot(data=predicted_grassonly_results, aes((reorder(x = Deprivati
 grassonly 
 
 greenother <- ggplot(data=predicted_greenother_results, aes((reorder(x = Deprivation, desc(Deprivation))), y = Estimate, ymin=LowerLevel, ymax=UpperLevel))+
-  geom_pointrange(aes (color = EducationLevel), size=0.1) + geom_errorbar(aes (color = EducationLevel)) + 
-  ylim(-2, 46) +
-  scale_color_manual(values=c("darkred", "darkseagreen4", "steelblue4"))+
+  geom_pointrange(aes (color = EducationLevel, shape=EducationLevel), size=0.3) + 
+  geom_errorbar(aes (color = EducationLevel)) + 
+  geom_hline(yintercept=mean(predicted_greenother_results$Estimate), linetype="dashed", color = "black") +
+  #ylim(0, 3) +
+  scale_color_manual(values=c("lightslateblue", "skyblue4", "darkgoldenrod2"))+
   facet_nested(~ RaceEthnicity + EducationLevel, nest_line = TRUE) + 
   theme_bw()+ # sets white background with gray grid marks
   theme(legend.position = "none", axis.text.x = element_text(size = 8, angle = 90, vjust = 0.5, hjust=1))+ # no legend, sets x-axis text size and angle
