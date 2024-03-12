@@ -15,10 +15,10 @@ census_df_sm <- census_df %>%
   select(idno,popdenmi_nowat) # keep only necess vars
 head(census_df_sm)
 dim(census_df_sm) #5693
-head(gsv_mesa)
+head(gsv_mesa) # using gsv_mesa df created in main analyses
 dim(gsv_mesa) #6814
 gsv_mesa_popden <- inner_join(gsv_mesa,census_df_sm,"idno")
-head(gsv_mesa_popden) # 6814   36
+head(gsv_mesa_popden) 
 dim (gsv_mesa_popden) # 5693   37
 
 # distrib of pop density
@@ -26,28 +26,28 @@ summary(gsv_mesa_popden$popdenmi_nowat)
 # Min.   1st Qu.    Median      Mean   3rd Qu.      Max.      NA's 
 # 3.19   2859.10   7499.39  25123.66  20575.79 200363.52        12 
 
-ggplot(gsv_mesa_popden, aes(x=popdenmi_nowat)) +
-  geom_density(fill="darkgreen")
+gsv_mesa_popden %>% 
+  filter(popdenmi_nowat >= 1000) %>% 
+  summarise(count = n())
 
-sum(mydata$sCode == "CA")
-sum(gsv_mesa_popden$popdenmi_nowat > 1000 )
+5187 / 5693 # 91% of our sample is considered urban
+
+sum(is.na(gsv_mesa_popden$popdenmi_nowat)) #12 missing
+
+gsv_mesa_popden %>% 
+  filter(!is.na(popdenmi_nowat) & popdenmi_nowat >= 1000) %>% 
+  summarise(count = n())
+5187/5693*100 # 91% have >1000 ppl per sq mile - Lilah confirmed this is expected
 
 gsv_mesa_popden_nona <- gsv_mesa_popden %>% 
-  filter(!is.na(popdenmi_nowat)) 
-
-sum(gsv_mesa_popden_nona$popdenmi_nowat >= 1000)
-5187/5693*100 # 91% have >1000 ppl per sq mile (which seems high/ridic?)
-
-sum(gsv_mesa_popden_nona$popdenmi_nowat >= 7500) # let's go with median
-
-gsv_mesa_popden_nona <- gsv_mesa_popden_nona %>% 
+  filter(!is.na(popdenmi_nowat)) %>% 
   mutate(
     popden_dichot = case_when(
       popdenmi_nowat < 7500 ~ 0,   # lower pop dens < 7500
                       TRUE ~ 1     # higher pop dens > 7500, no missing values so no case for
     )  
   )
-dim(gsv_mesa_popden_nona) #5681
+dim(gsv_mesa_popden_nona) #5681 - dropped the 12 with missing popdens
 sum(gsv_mesa_popden_nona$popden_dichot ==0)
 sum(gsv_mesa_popden_nona$popden_dichot ==1)
 2928+2753 # all good
@@ -76,6 +76,8 @@ gsv_mesa_popden_noNArace_edu_depr_sm <- gsv_mesa_popden_noNArace_edu_depr %>%
          green_total, tree_total, green_other, grass_500, popdenmi_nowat, popden_dichot)
 
 head(gsv_mesa_popden_noNArace_edu_depr_sm)
+dim(gsv_mesa_popden_noNArace_edu_depr_sm)
+
 
 # create 2 subsets: popden_dichot == 0 and popden_dichot ==1
 gsv_mesa_lowdens <-gsv_mesa_popden_noNArace_edu_depr_sm %>% 
@@ -97,12 +99,26 @@ race_edu_depr_strata_low <- gsv_mesa_lowdens %>%
 head(race_edu_depr_strata_low,50)
 range(race_edu_depr_strata_low$strata) # 1-36 as expected for race/eth x edu strata
 
+race_edu_depr_strata_low %>% 
+  select(strata, race1c, educ_3cat, n_depr, F1_PC2, f1_pc2_3cat) %>% 
+  head(., 20)
+
+strata_new_table_low <- table(race_edu_depr_strata_low$n_depr,race_edu_depr_strata_low$strata) # check the recode
+strata_new_table_low
+
 
 race_edu_depr_strata_high <- gsv_mesa_highdens %>%
   dplyr::group_by(race1c,educ_3cat,n_depr) %>%  # by race/eth, edu & nhood depr
   dplyr::mutate(strata=cur_group_id())               # 4 x 3 x 3 = 36 strata 
 head(race_edu_depr_strata_high,50)
 range(race_edu_depr_strata_high$strata)
+
+race_edu_depr_strata_high %>% 
+  select(strata, race1c, educ_3cat, n_depr, F1_PC2, f1_pc2_3cat) %>% 
+  head(., 20)
+
+strata_new_table_high <- table(race_edu_depr_strata_high$n_depr,race_edu_depr_strata_high$strata) # check the recode
+strata_new_table_high
 
 ### 2a.i: % total greenness, Simple intersectional  -----------------------------------------
 ### Bayesian MLM for simple intersectional model 

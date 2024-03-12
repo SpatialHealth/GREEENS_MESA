@@ -5,7 +5,6 @@
 # Last Edited: 2/3/2024
 
 library(tidyverse)
-library(dplyr)
 library(rio)
 library(tableone)
 library(WriteXLS)
@@ -40,34 +39,43 @@ gsv_mesa_noNAedu_f1pc2_sm <- gsv_mesa_noNAedu_f1pc2 %>% select(idno, race1c, edu
                                                                age1c, agecat1c, gender1, income1, income_3cat, year, green_total, 
                                                                tree_total, green_other, grass_500, site1c, site4c, F1_PC2)
 
+
+# swap in gsv_mesa_popden_noNArace_edu_depr_sm data from stratified analyses
+head(gsv_mesa_popden_noNArace_edu_depr_sm)
+gsv_mesa_popden_noNArace_edu_depr_sm
+popden_dichot
+popdenmi_nowat
+
 ###set cat vars to factors and assign labels for levels
-gsv_mesa_noNAedu_f1pc2_sm$race1c <- factor(gsv_mesa_noNAedu_f1pc2_sm$race1c, levels=c(1,2,3,4),
+gsv_mesa_popden_noNArace_edu_depr_sm$race1c <- factor(gsv_mesa_popden_noNArace_edu_depr_sm$race1c, levels=c(1,2,3,4),
                           labels=c("White", 
                                    "Chinese American",
                                    "Black",
                                    "Hispanic"))
 
-gsv_mesa_noNAedu_f1pc2_sm$educ_3cat <- factor(gsv_mesa_noNAedu_f1pc2_sm$educ_3cat, levels = c(1,2,3), 
+gsv_mesa_popden_noNArace_edu_depr_sm$educ_3cat <- factor(gsv_mesa_popden_noNArace_edu_depr_sm$educ_3cat, levels = c(1,2,3), 
                              labels = c("High School/GED or less", #reference
                                         "Some college", 
                                         "Bachelor's Degree or higher"))
 
-gsv_mesa_noNAedu_f1pc2_sm$f1_pc2_3cat <- factor(gsv_mesa_noNAedu_f1pc2_sm$f1_pc2_3cat, levels = c(3,2,1), 
+gsv_mesa_popden_noNArace_edu_depr_sm$n_depr <- factor(gsv_mesa_popden_noNArace_edu_depr_sm$n_depr, levels = c(1,2,3), 
                                labels=c("Most deprived neighborhood", #reference
                                         "Moderately deprived neighborhood",
                                         "Least deprived neighborhood"))  
 
+gsv_mesa_popden_noNArace_edu_depr_sm$gender1 <- factor(gsv_mesa_popden_noNArace_edu_depr_sm$gender1, levels = c(0,1), 
+                                                       labels = c("Female", "Male"))
 
-gsv_mesa_noNAedu_f1pc2_sm$gender1 <- factor(gsv_mesa_noNAedu_f1pc2_sm$gender1, levels = c(0,1), 
-                           labels = c("Female", "Male"))
+gsv_mesa_popden_noNArace_edu_depr_sm$popden_dichot <- factor(gsv_mesa_popden_noNArace_edu_depr_sm$popden_dichot, levels = c(0,1), 
+                           labels = c("<7,500 people per square mile", ">=7,500 people per square mile"))
 
-gsv_mesa_noNAedu_f1pc2_sm$income1 <- factor(gsv_mesa_noNAedu_f1pc2_sm$income1, levels = 1:13, 
+gsv_mesa_popden_noNArace_edu_depr_sm$income1 <- factor(gsv_mesa_popden_noNArace_edu_depr_sm$income1, levels = 1:13, 
                            labels = c("< $5,000", "$5,000-$7,999", "$8,000-$11,999", "$12,000-$15,999", "$16,000-$19,999", "$20,000-$24,999", "$25,000-$29,999", "$30,000-$34,999", "$35,000-$39,999", "$40,000-$49,000", "$50,000-$74,999", "$75,000-$99,999", "$100,000 +"))
 
-gsv_mesa_noNAedu_f1pc2_sm$site4c <- factor(gsv_mesa_noNAedu_f1pc2_sm$site4c, levels = c(3,4,5,6,7,8), 
+gsv_mesa_popden_noNArace_edu_depr_sm$site4c <- factor(gsv_mesa_popden_noNArace_edu_depr_sm$site4c, levels = c(3,4,5,6,7,8), 
                           labels = c("WFU", "COL", "JHU", "UMN", "NWU", "UCLA"))
 
-gsv_mesa_noNAedu_f1pc2_sm$agecat1c <- factor(gsv_mesa_noNAedu_f1pc2_sm$agecat1c, levels=c(1,2,3,4),
+gsv_mesa_popden_noNArace_edu_depr_sm$agecat1c <- factor(gsv_mesa_popden_noNArace_edu_depr_sm$agecat1c, levels=c(1,2,3,4),
                                            labels=c("45 - 54 years",
                                                     "55 - 64 years",
                                                     "65 - 74 years",
@@ -75,7 +83,7 @@ gsv_mesa_noNAedu_f1pc2_sm$agecat1c <- factor(gsv_mesa_noNAedu_f1pc2_sm$agecat1c,
 
 
 # collapse income to fewer cats & make factor
-gsv_mesa_noNAedu_f1pc2_sm   <- gsv_mesa_noNAedu_f1pc2_sm  %>% 
+gsv_mesa_popden_noNArace_edu_depr_sm   <- gsv_mesa_popden_noNArace_edu_depr_sm  %>% 
   mutate(income_4cat = 
            case_when(
              income1 %in% c("<$5,000", "$5,000-$7,999", "$8,000-$11,999",
@@ -86,12 +94,13 @@ gsv_mesa_noNAedu_f1pc2_sm   <- gsv_mesa_noNAedu_f1pc2_sm  %>%
              TRUE ~ 4 # > than 74,999
            ))
 
-gsv_mesa_noNAedu_f1pc2_sm$income_4cat <- factor(gsv_mesa_noNAedu_f1pc2_sm$income_4cat, levels=c(1,2,3,4),
+gsv_mesa_popden_noNArace_edu_depr_sm$income_4cat <- factor(gsv_mesa_popden_noNArace_edu_depr_sm$income_4cat, levels=c(1,2,3,4),
                            labels = c("<$24,999", #Reference
                                       "$25,000-$49,999", "$50,000-$74,999", ">$75,000"))
 
-
-# Create Table 1 ----------------------------------------------------------
+sum(gsv_mesa_popden_noNArace_edu_depr_sm$popden_dichot =="<7,500 people per square mile")
+sum(gsv_mesa_popden_noNArace_edu_depr_sm$popden_dichot ==">=7,500 people per square mile")
+# Create Table 1 ------------------------------------------------
 
 ###overall Ns/%s and means/SDs -----------------
 # cont vars: age, n'hood depr
@@ -100,13 +109,15 @@ gsv_mesa_noNAedu_f1pc2_sm$income_4cat <- factor(gsv_mesa_noNAedu_f1pc2_sm$income
 contVars <-
   c(
     "age1c",
-    "F1_PC2"
+    "F1_PC2",
+    "popdenmi_nowat"
   )
 catVars <-
   c(
     "race1c",
     "educ_3cat",
-    "f1_pc2_3cat",
+    "n_depr",
+    "popden_dichot",
     "gender1",
     "income_4cat",
     "site4c",
@@ -117,7 +128,7 @@ allvars <- c(contVars, catVars)
 table1 <-
   CreateTableOne(
     vars = allvars,
-    data = gsv_mesa_noNAedu_f1pc2_sm,
+    data = gsv_mesa_popden_noNArace_edu_depr_sm,
     factorVars = catVars
   )
 table1
@@ -161,8 +172,8 @@ contVars_greens <-
 table1_greens <-
   CreateTableOne(
     vars = contVars_greens,
-    strata = "agecat1c" ,
-    data = gsv_mesa_noNAedu_f1pc2_sm,
+    strata = "popden_dichot" ,
+    data = gsv_mesa_popden_noNArace_edu_depr_sm,
   )
 table1_greens
 

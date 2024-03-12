@@ -32,8 +32,8 @@ glimpse(gsv_mesa)
 summary(gsv_mesa$green_other)
 #    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
 #   0.020   0.550   0.860   1.003   1.240  18.020     314 
-gsv_mesa %>% 
-  summarize(n=n(green_other))
+#gsv_mesa %>% 
+#  summarize(n=n(green_other))
 sum(is.na(gsv_mesa$green_other)) # 314 missing from orig coded other_green
 
 gsv_mesa <- gsv_mesa %>% 
@@ -206,14 +206,14 @@ model1_race_edu_f1_greentotal
 #model1_race_edu_f1_greentotalNST # yeah runs but the values of distrib, and thus the estimates, are entirely diff
 
 # trying out with log-normal, link identity 
-#model1_race_edu_f1_greentotal_ln <- brm(green_total~1+age1c+gender1+income1+site4c+(1|strata),
-#                                        data = race_edu_depr_strata,
-#                                       family = "lognormal",
-#                                        warmup = 5000,
-#                                        iter = 10000,
-#                                       chains=1, seed=123)
+model1_race_edu_f1_greentotal_ln <- brm(green_total~1+age1c+gender1+income1+site4c+(1|strata),
+                                        data = race_edu_depr_strata,
+                                       family = "lognormal",
+                                        warmup = 5000,
+                                        iter = 10000,
+                                       chains=1, seed=123)
 
-#model1_race_edu_f1_greentotal_ln # it ran....but pretty close to same as with normal transformed
+model1_race_edu_f1_greentotal_ln # it ran....but pretty close to same as with normal transformed
                                 # Exponentiating estimates leave me with way smaller variances than with my orig model
 
 
@@ -297,7 +297,7 @@ any(model1_race_edu_f1_green_other.rhats > 1.05) # convergence good
 
 ### 2b.i: % total greenness, interactional model -----------------------------------------
 
-model2_race_edu_f1_greentotal <- brm(green_total~1+race1c+educ_3cat+f1_pc2_3cat+age1c+gender1+income1+site4c+(1|strata),
+model2_race_edu_f1_greentotal <- brm(green_total~1+race1c+educ_3cat+n_depr+age1c+gender1+income1+site4c+(1|strata),
                                      data = race_edu_depr_strata,
                                      warmup = 5000,
                                      iter = 10000,
@@ -307,7 +307,7 @@ model2_race_edu_f1_greentotal
 
 ### 2b.ii: % trees only, interactional model -----------------------------------------
 
-model2_race_edu_f1_trees <- brm(tree_total~1+race1c+educ_3cat+f1_pc2_3cat+age1c+gender1+income1+site4c+(1|strata),
+model2_race_edu_f1_trees <- brm(tree_total~1+race1c+educ_3cat+n_depr+age1c+gender1+income1+site4c+(1|strata),
                                 data = race_edu_depr_strata,
                                 warmup = 5000,
                                 iter = 10000,
@@ -317,7 +317,7 @@ model2_race_edu_f1_trees
 
 ### 2b.iii: % grass only, interactional model -----------------------------------------
 
-model2_race_edu_f1_grass <- brm(grass_500~1+race1c+educ_3cat+f1_pc2_3cat+age1c+gender1+income1+site4c+(1|strata),
+model2_race_edu_f1_grass <- brm(grass_500~1+race1c+educ_3cat+n_depr+age1c+gender1+income1+site4c+(1|strata),
                                      data = race_edu_depr_strata,
                                      warmup = 5000,
                                      iter = 10000,
@@ -327,7 +327,7 @@ model2_race_edu_f1_grass
 
 ### 2b.iv: % other greenness, interactional model -----------------------------------------
 
-model2_race_edu_f1_green_other <- brm(green_other~1+race1c+educ_3cat+f1_pc2_3cat+age1c+gender1+income1+site4c+(1|strata),
+model2_race_edu_f1_green_other <- brm(green_other~1+race1c+educ_3cat+n_depr+age1c+gender1+income1+site4c+(1|strata),
                                 data = race_edu_depr_strata,
                                 warmup = 5000,
                                 iter = 10000,
@@ -397,11 +397,19 @@ round(0.0484/ (0.0484 + 0.5929)*100,2) # 7.55%
 # https://www.andrewheiss.com/blog/2021/11/10/ame-bayes-re-guide/ 
 # https://paul-buerkner.github.io/brms/reference/predictive_interval.brmsfit.html
 
+# assuming normal distrib model
 pred.means.model1_race_edu_f1_greentotal <- model1_race_edu_f1_greentotal %>% 
   epred_draws(race_edu_depr_strata) %>% 
   group_by(strata) %>% 
   mean_qi(.epred) # 
 View(pred.means.model1_race_edu_f1_greentotal)
+
+# lognormal model
+pred.means.model1_race_edu_f1_greentotal_ln <- model1_race_edu_f1_greentotal_ln %>% 
+  epred_draws(race_edu_depr_strata) %>% 
+  group_by(strata) %>% 
+  mean_qi(.epred) # 
+View(pred.means.model1_race_edu_f1_greentotal_ln)
 
 ### 4b. % trees only -------
 pred.means.model1_race_edu_f1_trees <- model1_race_edu_f1_trees %>% 
@@ -429,19 +437,161 @@ View(pred.means.model1_race_edu_f1_green_other)
 #
 #
 #
-# ### this all is for later
-# Expected average greenness per strata
-expected.means.model1_race_edu_f1_greentotal <- model1_race_edu_f1_greentotal %>%
-  epred_draws(race_edu_depr_strata, re_formula = NA) %>% 
-  group_by(strata) %>% 
-  mean_qi(.epred)
+# step 5: RQ 3: To what extent do interx of social categories contribute incrementally to explaining greenspace inequalities? ---------------
+# --> Calculate the VPC (in %) in the interactional model (VPC adjusted)
 
-View(expected.means.model1_race_edu_f1_greentotal)
+## race x edu x neighborhood dep ####
+### total greenspace ####
+model2_race_edu_f1_greentotal
+# Variance at race x edu strata strata level model 2 (sd intercept estimate)^2
+1.93^2 # 3.7249
 
-# Check whether difference between predicted and expected values equals random effects
-show2 <- cbind(pred.means.model1_race_edu_f1_greentotal$.value, expected.means.model1_race_edu_f1_greentotal$.value, bayes.random.effects.new$Estimate.Intercept)
-show2 <- as.data.frame(show2)
-show2$diff <- show2$V1 - show2$V2
-View(show2) # difference equals random effects
+# Variance at individual level model 2 (fam specific params sigma)^2
+8.42^2 # 70.8964
+
+# Calculate adjusted VPC model 2
+round(3.7249 / (3.7249 + 70.8964)*100,2) # 4.99%
+
+# Proportional Change in Variance (PCV) = Assessment of the extent to which between-stratum 
+# inequalities are explained by additive vs. interactive/residual effects
+# i.e. percentage of between-strata variance that cannot be explained by main effects (in %):
+# (Variance at individual level model 2 - Variance at strata strata level model 2)/Variance at individual level model 2 
+round(((70.8964-3.7249)/70.8964)*100,2) # 94.75
+100 - round(((70.8964-3.7249)/70.8964)*100,2) # 5.25
+
+### trees ####
+model2_race_edu_f1_trees
+# Variance at race x edu strata strata level model 2 (sd intercept estimate)^2
+1.09^2 # 1.1881
+
+# Variance at individual level model 2 (fam specific params sigma)^2
+6.78 ^2 # 45.9684
+
+# Calculate adjusted VPC model 2
+round(1.1881 / (1.1881 + 45.9684)*100,2) # 2.52%
+
+# Proportional Change in Variance (PCV) = Assessment of the extent to which between-stratum 
+# inequalities are explained by additive vs. interactive/residual effects
+# i.e. percentage of between-strata variance that cannot be explained by main effects (in %):
+round(((45.9684-1.1881)/45.9684)*100,2) # 97.46
+100 - round(((45.9684-1.1881)/45.9684)*100,2) # 2.58
+
+### grass ####
+model2_race_edu_f1_grass
+# Variance at race x edu strata strata level model 2 (sd intercept estimate)^2
+0.76^2 # 0.5776
+
+# Variance at individual level model 2 (fam specific params sigma)^2
+2.79^2 # 7.7841
+
+# Calculate adjusted VPC model 2
+round(0.5776 / (0.5776 + 7.7841)*100,2) # 5.04%
+
+# Proportional Change in Variance (PCV) = Assessment of the extent to which between-stratum 
+# inequalities are explained by additive vs. interactive/residual effects
+# i.e. percentage of between-strata variance that cannot be explained by main effects (in %):
+# (Variance at individual level model 2 - Variance at strata strata level model 2)/Variance at individual level model 2 
+round(((7.7841-0.5776)/7.7841)*100,2) # 92.58
+100 - round(((7.7841-0.5776)/7.7841)*100,2) # 7.42
+
+### other green ####
+model2_race_edu_f1_green_other
+# Variance at race x edu strata strata level model 2 (sd intercept estimate)^2
+0.12^2 # 0.0144
+
+# Variance at individual level model 2 (fam specific params sigma)^2
+0.77 ^2 # 0.5929
+
+# Calculate adjusted VPC model 2
+round(0.0144 / (0.0144 + 0.5929)*100,2) # 2.37%
+
+# Proportional Change in Variance (PCV) = Assessment of the extent to which between-stratum 
+# inequalities are explained by additive vs. interactive/residual effects
+# i.e. percentage of between-strata variance that cannot be explained by main effects (in %):
+round(((0.5929-0.0144)/0.5929)*100,2) # 97.57
+100 - round(((0.5929-0.0144)/0.5929)*100,2) # 2.43
+
+# step 6: RQ 4: Are greenspace inequalities more or less pronounced in specific intersectional strata? ---------------
+## for race x edu strata SKIP THIS FOR NOW SINCE PROCEEDING WITH race/edu/f1_pc strata
+
+## for race x edu x neighborhood deprivation strata
+
+#### Extract random effects
+#bayes.random.effects <- brms::ranef(mcmc.model2) - Keller example
+bayes.random.effects_green <- brms::ranef(model2_race_edu_f1_greentotal)
+bayes.random.effects_trees <- brms::ranef(model2_race_edu_f1_trees)
+bayes.random.effects_grass <- brms::ranef(model2_race_edu_f1_grass)
+bayes.random.effects_green_other <- brms::ranef(model2_race_edu_f1_green_other)
+
+# As data frame
+#bayes.random.effects.new <- as.data.frame(bayes.random.effects$strata) Keller example
+bayes.random.effects_green_new <- as.data.frame(bayes.random.effects_green$strata)
+bayes.random.effects_trees_new <- as.data.frame(bayes.random.effects_trees$strata)
+bayes.random.effects_grass_new <- as.data.frame(bayes.random.effects_grass$strata)
+bayes.random.effects_green_other_new <- as.data.frame(bayes.random.effects_green_other$strata)
+
+
+#Round
+#bayes.random.effects.new <- round(bayes.random.effects.new, 3)
+bayes.random.effects_green_new <- round(bayes.random.effects_green_new, 3) 
+bayes.random.effects_trees_new <- round(bayes.random.effects_trees_new, 3)
+bayes.random.effects_grass_new <- round(bayes.random.effects_grass_new, 3) 
+bayes.random.effects_green_other_new <- round(bayes.random.effects_green_other_new, 3)
+
+
+# Add strata number
+#bayes.random.effects.new$strata <- 1:36
+bayes.random.effects_green_new$strata <- 1:36
+bayes.random.effects_trees_new$strata <- 1:36
+bayes.random.effects_grass_new$strata <- 1:36
+bayes.random.effects_green_other_new$strata <- 1:36
+
+# Change order of variables
+#bayes.random.effects.new <- bayes.random.effects.new[,c(5,1,2,3,4)]
+bayes.random.effects_green_new <- bayes.random.effects_green_new[,c(5,1,2,3,4)]
+bayes.random.effects_trees_new <- bayes.random.effects_trees_new[,c(5,1,2,3,4)]
+bayes.random.effects_grass_new <- bayes.random.effects_grass_new[,c(5,1,2,3,4)]
+bayes.random.effects_green_other_new <- bayes.random.effects_green_other_new[,c(5,1,2,3,4)]
+
+
+# Set working directory (e.g., "C:/Users/File")
+setwd("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/results")
+
+
+# Export table
+WriteXLS(bayes.random.effects_green_new, ExcelFileName = "bayes.random.effects_green.xls", SheetNames = NULL, perl = "perl",
+         verbose = FALSE, Encoding = c("UTF-8", "latin1", "cp1252"),
+         row.names = TRUE, col.names = TRUE,
+         AdjWidth = FALSE, AutoFilter = FALSE, BoldHeaderRow = FALSE,
+         na = "",
+         FreezeRow = 0, FreezeCol = 0,
+         envir = parent.frame())
+
+
+WriteXLS(bayes.random.effects_trees_new, ExcelFileName = "bayes.random.effects_trees.xls", SheetNames = NULL, perl = "perl",
+         verbose = FALSE, Encoding = c("UTF-8", "latin1", "cp1252"),
+         row.names = TRUE, col.names = TRUE,
+         AdjWidth = FALSE, AutoFilter = FALSE, BoldHeaderRow = FALSE,
+         na = "",
+         FreezeRow = 0, FreezeCol = 0,
+         envir = parent.frame())
+
+# Export table
+WriteXLS(bayes.random.effects_grass_new, ExcelFileName = "bayes.random.effects_grass.xls", SheetNames = NULL, perl = "perl",
+         verbose = FALSE, Encoding = c("UTF-8", "latin1", "cp1252"),
+         row.names = TRUE, col.names = TRUE,
+         AdjWidth = FALSE, AutoFilter = FALSE, BoldHeaderRow = FALSE,
+         na = "",
+         FreezeRow = 0, FreezeCol = 0,
+         envir = parent.frame())
+
+
+WriteXLS(bayes.random.effects_green_other_new, ExcelFileName = "bayes.random.effects_gr_other.xls", SheetNames = "bayes.random.effects_other.xls", perl = "perl",
+         verbose = FALSE, Encoding = c("UTF-8", "latin1", "cp1252"),
+         row.names = TRUE, col.names = TRUE,
+         AdjWidth = FALSE, AutoFilter = FALSE, BoldHeaderRow = FALSE,
+         na = "",
+         FreezeRow = 0, FreezeCol = 0,
+         envir = parent.frame())
 
 
