@@ -37,13 +37,13 @@ summary(gsv_mesa$green_other)
 sum(is.na(gsv_mesa$green_other)) # 314 missing from orig coded other_green
 
 gsv_mesa <- gsv_mesa %>% 
-  select(-green_other)
+  dplyr::select(-green_other)
 dim(gsv_mesa) # 6814 | 34
 
 gsv_mesa <- gsv_mesa %>%
   mutate(green_other = flowers_500 + field_500 + plant_500)
 
-dim(gsv_mesa)
+dim(gsv_mesa) # 6814 | 35
 sum(is.na(gsv_mesa$green_other))
 summary(gsv_mesa$green_other)
 # Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
@@ -64,7 +64,7 @@ gsv_mesa <- gsv_mesa %>%
   )
 
 gsv_mesa %>% 
-  select(F1_PC2, f1_pc2_3cat, n_depr) %>% 
+  dplyr::select(F1_PC2, f1_pc2_3cat, n_depr) %>% 
   head(., 20)
 
 depr_table <- table(gsv_mesa$f1_pc2_3cat,gsv_mesa$n_depr) # check the recode
@@ -88,7 +88,7 @@ gsv_mesa_noNArace_edu_depr <- gsv_mesa %>%
 dim(gsv_mesa_noNArace_edu_depr) # 5536
 
 gsv_mesa_noNArace_edu_depr_sm <- gsv_mesa_noNArace_edu_depr %>% 
-  select(idno, race1c, educ1, educ_3cat, F1_PC2, f1_pc2_3cat, n_depr,
+  dplyr::select(idno, race1c, educ1, educ_3cat, F1_PC2, f1_pc2_3cat, n_depr,
         age1c, agecat1c, gender1, income1, income_3cat, year, site1c, site4c, 
         green_total, tree_total, green_other, grass_500)
 
@@ -112,7 +112,7 @@ race_edu_depr_strata %>%
 
 # compare the new strata with the flipped depr var to the old
 race_edu_depr_strata %>% 
-  select(strata, race1c, educ_3cat, n_depr, F1_PC2, f1_pc2_3cat) %>% 
+  dplyr::select(strata, race1c, educ_3cat, n_depr, F1_PC2, f1_pc2_3cat) %>% 
   head(., 20)
 
 strata_new_table <- table(race_edu_depr_strata$n_depr,race_edu_depr_strata$strata) # check the recode
@@ -125,10 +125,6 @@ out_dir <- "/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIc
 readr::write_csv(x = race_edu_depr_strata, 
                 file = paste0(out_dir, "race_edu_depr_strata.csv"), 
                 num_threads = 3,) 
-
-readr::write_csv(x = race_edu_depr_strata, 
-                 file = paste0(out_dir, "race_edu_depr_strata_forSAS.csv"), 
-                 num_threads = 3, na=".") # adding option param to change NA to.
 
 ######## testing out doing normal score transformation of  the greenness measures to use in models
 #race_edu_depr_strata$green_totalNST = blom(race_edu_depr_strata$green_total)
@@ -178,7 +174,7 @@ model1_race_edu_f1_greentotal <- brm(green_total~1+age1c+gender1+income1+site4c+
                                      data = race_edu_depr_strata,
                                      warmup = 5000,
                                      iter = 10000,
-                                     chains=1, seed=123)
+                                     chains=3, seed=123)
 
 model1_race_edu_f1_greentotal
 
@@ -226,15 +222,15 @@ plot(model1_race_edu_f1_greentotal)
 model1_race_edu_f1_greentotal.rhats <- round(as.numeric(model1_race_edu_f1_greentotal$rhats), 2)
 model1_race_edu_f1_greentotal.rhats
 
-any(model1_race_edu_f1_greentotal.rhats > 1.1) # convergence good
-any(model1_race_edu_f1_greentotal.rhats > 1.05) # convergence good
+any(model1_race_edu_f1_greentotal.rhats > 1.1) # false indicates convergence good
+any(model1_race_edu_f1_greentotal.rhats > 1.05) # false indicates convergence good
 
 ### 2a.ii: % trees only, Simple intersectional  -----------------------------------------
 model1_race_edu_f1_trees <- brm(tree_total~1+age1c+gender1+income1+site4c+(1|strata),
                                 data = race_edu_depr_strata,
                                 warmup = 5000,
                                 iter = 10000,
-                                chains=1, seed=123)
+                                chains=3, seed=123)
 
 model1_race_edu_f1_trees
 
@@ -256,7 +252,7 @@ model1_race_edu_f1_grass <- brm(grass_500~1+age1c+gender1+income1+site4c+(1|stra
                                 data = race_edu_depr_strata,
                                 warmup = 5000,
                                 iter = 10000,
-                                chains=1, seed=123)
+                                chains=3, seed=123)
 
 model1_race_edu_f1_grass
 
@@ -278,7 +274,7 @@ model1_race_edu_f1_green_other <- brm(green_other~1+age1c+gender1+income1+site4c
                                 data = race_edu_depr_strata,
                                 warmup = 5000,
                                 iter = 10000,
-                                chains=1, seed=123)
+                                chains=3, seed=123)
 
 model1_race_edu_f1_green_other
 
@@ -301,7 +297,7 @@ model2_race_edu_f1_greentotal <- brm(green_total~1+race1c+educ_3cat+n_depr+age1c
                                      data = race_edu_depr_strata,
                                      warmup = 5000,
                                      iter = 10000,
-                                     chains=1, seed=123)
+                                     chains=3, seed=123)
 
 model2_race_edu_f1_greentotal
 
@@ -311,7 +307,7 @@ model2_race_edu_f1_trees <- brm(tree_total~1+race1c+educ_3cat+n_depr+age1c+gende
                                 data = race_edu_depr_strata,
                                 warmup = 5000,
                                 iter = 10000,
-                                chains=1, seed=123)
+                                chains=3, seed=123)
 
 model2_race_edu_f1_trees
 
@@ -321,7 +317,7 @@ model2_race_edu_f1_grass <- brm(grass_500~1+race1c+educ_3cat+n_depr+age1c+gender
                                      data = race_edu_depr_strata,
                                      warmup = 5000,
                                      iter = 10000,
-                                     chains=1, seed=123)
+                                     chains=3, seed=123)
 
 model2_race_edu_f1_grass
 
@@ -331,7 +327,7 @@ model2_race_edu_f1_green_other <- brm(green_other~1+race1c+educ_3cat+n_depr+age1
                                 data = race_edu_depr_strata,
                                 warmup = 5000,
                                 iter = 10000,
-                                chains=1, seed=123)
+                                chains=3, seed=123)
 
 model2_race_edu_f1_green_other
 
@@ -341,13 +337,13 @@ model2_race_edu_f1_green_other
 # Check results
 model1_race_edu_f1_greentotal
 # Variance at race x edu strata strata level model 1 (sd intercept estimate)^2
-2.78 ^2 # 7.7284
+2.80 ^2 # 7.84
 
 # Variance at individual level model 1 (fam specific params sigma)^2
 8.42^2 # 70.8964
 
 # Calculate VPC model 1
-round(7.7284/ (7.7284 + 70.8964)*100,2) # 9.83%
+round(7.84/ (7.84 + 70.8964)*100,2) # 9.96%
 
 ### 3b. % trees only -----------------------------------------
 model1_race_edu_f1_trees

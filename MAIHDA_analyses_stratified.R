@@ -12,7 +12,7 @@ census_df <- read_sas("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEE
 head(census_df)
 census_df_sm <- census_df %>% 
   filter(EXAM==4) %>% #select for exam 4 values only
-  select(idno,popdenmi_nowat) # keep only necess vars
+  dplyr::select(idno,popdenmi_nowat) # keep only necess vars
 head(census_df_sm)
 dim(census_df_sm) #5693
 head(gsv_mesa) # using gsv_mesa df created in main analyses
@@ -71,7 +71,7 @@ gsv_mesa_popden_noNArace_edu_depr <- gsv_mesa_popden_nona %>%
 dim(gsv_mesa_popden_noNArace_edu_depr) # 5535 (just one less than my orig dataset 5536
 
 gsv_mesa_popden_noNArace_edu_depr_sm <- gsv_mesa_popden_noNArace_edu_depr %>% 
-  select(idno, race1c, educ1, educ_3cat, F1_PC2, f1_pc2_3cat, n_depr,
+  dplyr::select(idno, race1c, educ1, educ_3cat, F1_PC2, f1_pc2_3cat, n_depr,
          age1c, agecat1c, gender1, income1, income_3cat, year, site1c, site4c, 
          green_total, tree_total, green_other, grass_500, popdenmi_nowat, popden_dichot)
 
@@ -100,7 +100,7 @@ head(race_edu_depr_strata_low,50)
 range(race_edu_depr_strata_low$strata) # 1-36 as expected for race/eth x edu strata
 
 race_edu_depr_strata_low %>% 
-  select(strata, race1c, educ_3cat, n_depr, F1_PC2, f1_pc2_3cat) %>% 
+  dplyr::select(strata, race1c, educ_3cat, n_depr, F1_PC2, f1_pc2_3cat) %>% 
   head(., 20)
 
 strata_new_table_low <- table(race_edu_depr_strata_low$n_depr,race_edu_depr_strata_low$strata) # check the recode
@@ -114,7 +114,7 @@ head(race_edu_depr_strata_high,50)
 range(race_edu_depr_strata_high$strata)
 
 race_edu_depr_strata_high %>% 
-  select(strata, race1c, educ_3cat, n_depr, F1_PC2, f1_pc2_3cat) %>% 
+  dplyr::select(strata, race1c, educ_3cat, n_depr, F1_PC2, f1_pc2_3cat) %>% 
   head(., 20)
 
 strata_new_table_high <- table(race_edu_depr_strata_high$n_depr,race_edu_depr_strata_high$strata) # check the recode
@@ -126,7 +126,7 @@ model1_race_edu_f1_greentotal_low <- brm(green_total~1+age1c+gender1+income1+sit
                                      data = race_edu_depr_strata_low,
                                      warmup = 5000,
                                      iter = 10000,
-                                     chains=1, seed=123)
+                                     chains=3, seed=123)
 
 model1_race_edu_f1_greentotal_low
 
@@ -134,7 +134,7 @@ model1_race_edu_f1_greentotal_high <- brm(green_total~1+age1c+gender1+income1+si
                                          data = race_edu_depr_strata_high,
                                          warmup = 5000,
                                          iter = 10000,
-                                         chains=1, seed=123)
+                                         chains=3, seed=123)
 
 model1_race_edu_f1_greentotal_high
 
