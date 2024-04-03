@@ -140,6 +140,14 @@ n.strata.30 <- sum(n.strata.df$Freq>=30) #num strata with more than 30 individs
 n.strata.30
 n.strata.30/total.number.strata* 100 # 97% of strata have >30 individs
 
+n.strata.50 <- sum(n.strata.df$Freq>=50) #num strata with more than 30 individs
+n.strata.50
+n.strata.50/total.number.strata* 100 # 86% of strata have >50 individs
+
+n.strata.20 <- sum(n.strata.df$Freq>=20) #num strata with more than 30 individs
+n.strata.20
+n.strata.20/total.number.strata* 100 # 86% of strata have >50 individs
+
 # step 2. MLM by strata: race x edu x n'hood depriv-----------------------------------------
 ### Perform multilevel analysis to partition the variance between 
 ###     and within intersectional strata                       
