@@ -189,5 +189,8 @@ t1_greens_out <- print(
 ## Save to a CSV file - USE THIS METHOD
 write.csv(t1_greens_out, file = "/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/results/tables/table1_greens_strat_by_cat_vars.csv")
 
+# Supp Table 1 ------------------------------------------------
+## strata of race/eth, edu & NSES
+table(race_edu_depr_strata$strata)
 
 
