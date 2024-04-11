@@ -3,7 +3,6 @@
 # Created: 11/27/2023
 # Last Edited: 12/16/2023
 
-library(dplyr)
 library(tidyverse)
 library(brm)
 library(brms)
@@ -19,6 +18,13 @@ library(extraDistr)
 setwd("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/data")
 
 # step 0. data import and mgmt------------------------------------------------------------------
+
+###scope original long gsv values
+gsv_long <- read.csv("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/data/datagsv_long.csv")
+head(gsv_long[c("idno","year","grass_500", "trees_500")],150) %>% 
+  filter(year >= 2007 & year<=2009)
+
+
 
 ###Read in combined GSV-Mesa data file 
 gsv_mesa <- read.csv("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/data/gsv_demo_census_2007.csv")
