@@ -1,7 +1,7 @@
 # GREEENS project: MAIHDA analyses - stratifying models by popn density -------------------------
 # Author: Tara Jenson
 # Created: 2/8/2024
-# Last Edited: 
+# Last Edited: 8/7/2024
 
 library(haven)
 library(tidyverse)
@@ -15,29 +15,35 @@ census_df_sm <- census_df %>%
   dplyr::select(idno,popdenmi_nowat) # keep only necess vars
 head(census_df_sm)
 dim(census_df_sm) #5693
-head(gsv_mesa) # using gsv_mesa df created in main analyses
-dim(gsv_mesa) #6814
-gsv_mesa_popden <- inner_join(gsv_mesa,census_df_sm,"idno")
+
+# pull gsv2005-2007_mesa data
+gsv20052007_mesa_forstrat_analysis <- read.csv("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/data/gsv20052007_mesa.csv")
+head(gsv20052007_mesa_forstrat_analysis,20)
+dim(gsv20052007_mesa_forstrat_analysis) # 6594 | 25
+glimpse(gsv20052007_mesa_forstrat_analysis) 
+
+# join GSV+mesa data with census data
+gsv_mesa_popden <- inner_join(gsv20052007_mesa_forstrat_analysis,census_df_sm,"idno")
 head(gsv_mesa_popden) 
-dim (gsv_mesa_popden) # 5693   37
+dim (gsv_mesa_popden) # 5618   26
 
 # distrib of pop density
 summary(gsv_mesa_popden$popdenmi_nowat)
 # Min.   1st Qu.    Median      Mean   3rd Qu.      Max.      NA's 
-# 3.19   2859.10   7499.39  25123.66  20575.79 200363.52        12 
+# 3.19   2913.68   7499.39  25103.88   20588.62   200363.52   5 
 
 gsv_mesa_popden %>% 
   filter(popdenmi_nowat >= 1000) %>% 
   summarise(count = n())
 
-5187 / 5693 # 91% of our sample is considered urban
+5134 / 5618 # 91% of our sample is considered urban
 
-sum(is.na(gsv_mesa_popden$popdenmi_nowat)) #12 missing
+sum(is.na(gsv_mesa_popden$popdenmi_nowat)) # 5 missing
 
 gsv_mesa_popden %>% 
   filter(!is.na(popdenmi_nowat) & popdenmi_nowat >= 1000) %>% 
   summarise(count = n())
-5187/5693*100 # 91% have >1000 ppl per sq mile - Lilah confirmed this is expected
+5134/5618*100 # 91% have >1000 ppl per sq mile - Lilah confirmed this is expected
 
 gsv_mesa_popden_nona <- gsv_mesa_popden %>% 
   filter(!is.na(popdenmi_nowat)) %>% 
@@ -47,10 +53,10 @@ gsv_mesa_popden_nona <- gsv_mesa_popden %>%
                       TRUE ~ 1     # higher pop dens > 7500, no missing values so no case for
     )  
   )
-dim(gsv_mesa_popden_nona) #5681 - dropped the 12 with missing popdens
+dim(gsv_mesa_popden_nona) # 5613 dropped the 5 with missing popdens
 sum(gsv_mesa_popden_nona$popden_dichot ==0)
 sum(gsv_mesa_popden_nona$popden_dichot ==1)
-2928+2753 # all good
+2883+2730 # all good
 
 # now let's run the total greenness models stratified by <7500 and > 7500
 ###set cat vars to factors 
@@ -67,26 +73,28 @@ gsv_mesa_popden_nona$income1 <- factor(gsv_mesa_popden_nona$income1)
 gsv_mesa_popden_noNArace_edu_depr <- gsv_mesa_popden_nona %>% 
   filter(!is.na(race1c)) %>%
   filter(!is.na(educ_3cat)) %>% # subset to non-missing edu & f1_pc2 for race/eth x edu x f1_pc2 strata
-  filter(!is.na(n_depr))
-dim(gsv_mesa_popden_noNArace_edu_depr) # 5535 (just one less than my orig dataset 5536
-
+  filter(!is.na(n_depr)) %>% 
+  filter(!is.na(green_other_2005_2007)) %>%  # ... non-missing outcomes
+  filter(!is.na(income1)) # non-missing income
+dim(gsv_mesa_popden_noNArace_edu_depr) # 5613 (a fair bit of missing income)
+glimpse(gsv_mesa_popden_noNArace_edu_depr)
 gsv_mesa_popden_noNArace_edu_depr_sm <- gsv_mesa_popden_noNArace_edu_depr %>% 
   dplyr::select(idno, race1c, educ1, educ_3cat, F1_PC2, f1_pc2_3cat, n_depr,
          age1c, agecat1c, gender1, income1, income_3cat, year, site1c, site4c, 
-         green_total, tree_total, green_other, grass_500, popdenmi_nowat, popden_dichot)
+         green_total_2005_2007, tree_total_2005_2007, grass_2005_2007, green_other_2005_2007, popdenmi_nowat, popden_dichot)
 
 head(gsv_mesa_popden_noNArace_edu_depr_sm)
-dim(gsv_mesa_popden_noNArace_edu_depr_sm)
+dim(gsv_mesa_popden_noNArace_edu_depr_sm) # 5246 21
 
 
 # create 2 subsets: popden_dichot == 0 and popden_dichot ==1
 gsv_mesa_lowdens <-gsv_mesa_popden_noNArace_edu_depr_sm %>% 
   filter(popden_dichot==0)
-dim(gsv_mesa_lowdens) # 2873
+dim(gsv_mesa_lowdens) # 2646
 gsv_mesa_highdens <-gsv_mesa_popden_noNArace_edu_depr_sm %>% 
   filter(popden_dichot==1)
-dim(gsv_mesa_highdens) # 2662
-2873+2662 # 5535 - yep
+dim(gsv_mesa_highdens) # 2600
+2646+2600 # 5246 - yep
 
 # step 1 intersectional strata & size checks #################
 ### 1a. create intersectional strata ######################################
@@ -122,7 +130,8 @@ strata_new_table_high
 
 ### 2a.i: % total greenness, Simple intersectional  -----------------------------------------
 ### Bayesian MLM for simple intersectional model 
-model1_race_edu_f1_greentotal_low <- brm(green_total~1+age1c+gender1+income1+site4c+(1|strata),
+glimpse(race_edu_depr_strata_low)
+model1_race_edu_f1_greentotal_low <- brm(green_total_2005_2007~1+age1c+gender1+income1+site4c+(1|strata),
                                      data = race_edu_depr_strata_low,
                                      warmup = 5000,
                                      iter = 10000,
@@ -130,7 +139,7 @@ model1_race_edu_f1_greentotal_low <- brm(green_total~1+age1c+gender1+income1+sit
 
 model1_race_edu_f1_greentotal_low
 
-model1_race_edu_f1_greentotal_high <- brm(green_total~1+age1c+gender1+income1+site4c+(1|strata),
+model1_race_edu_f1_greentotal_high <- brm(green_total_2005_2007~1+age1c+gender1+income1+site4c+(1|strata),
                                          data = race_edu_depr_strata_high,
                                          warmup = 5000,
                                          iter = 10000,

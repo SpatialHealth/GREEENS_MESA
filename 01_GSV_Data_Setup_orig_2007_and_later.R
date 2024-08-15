@@ -109,13 +109,15 @@ for(i in 1:nrow(gsv_dict)){
   colnames(long_df) <- sub(paste0(gsv_dict[i,1], '_'), paste0(gsv_dict[i,2], '_'), colnames(long_df), fixed = T)
 }
 
-
+glimpse(long_df)
+long_df %>% 
+  summarise_all(~ sum(is.na(.))) # note there's a fair bit of missingness in these measures
 ### 4. Export Data #############################################################
 out_dir <- "/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/data/"
 
 readr::write_csv(x = long_df, 
-                 file = paste0(out_dir, "gsv_long_noNAs.csv"), 
-                 num_threads = 3, na=".") # adding option param to change NA to.
+                 file = paste0(out_dir, "gsv_long_2007_and_later.csv"), 
+                 num_threads = 3) # adding option param to change NA to.
 
 
 
