@@ -20,10 +20,10 @@ setwd("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Gr
 # step 0. data import and mgmt------------------------------------------------------------------
 
 ## pull and join 2007 + 2005-2006 GSV values-------
-gsv_2005_2006_for_join <- readr::read_csv(paste0("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/data/gsv_2005_2006.csv"))
-glimpse(gsv_2005_2006_for_join) # 15,072 --> 7536 * 2 yrs
+gsv_2000_thru_2002_for_join <- readr::read_csv(paste0("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/data/gsv_2000_thru_2002.csv"))
+glimpse(gsv_2000_thru_2002_for_join) # 22,608 --> 7536 * 3 yrs
 ### check missingness
-gsv_2005_2006_for_join %>% 
+gsv_2000_thru_2002_for_join %>% 
   summarise_all(~ sum(is.na(.))) # no missingness....OH WAIT there totally is, it's just not going to 
     # show up until I turn all the GSV cols into numeric down below
 
@@ -234,10 +234,34 @@ gsv_mesa_noNArace_edu_depr <- gsv20052007_mesa %>%
   filter(!is.na(income1)) # non-missing income
 dim(gsv_mesa_noNArace_edu_depr) # 5246
 
+## recode income to 4-cat-----
+glimpse(gsv_mesa_noNArace_edu_depr)
+gsv_mesa_noNArace_edu_depr <- gsv_mesa_noNArace_edu_depr %>% 
+  mutate(income1=as.numeric(income1)) %>% 
+  mutate(income_4cat = case_when(
+    (income1 >= 1 & income1 <= 6) ~ 1, # <$25,000       
+    (income1 >= 7 & income1 <= 10) ~ 2, # $25k - 49,999       
+    (income1 == 11) ~ 3, # $50k - $74999         
+    (income1 == 12 | income1 == 13) ~ 4, # >$75k
+    TRUE ~ NA
+  ))
+
+xtabs( ~ income_4cat + income1, gsv_mesa_noNArace_edu_depr, addNA = TRUE, na.action = NULL) # looks good
+gsv_mesa_noNArace_edu_depr$income1 <- factor(gsv_mesa_noNArace_edu_depr$income1)
+gsv_mesa_noNArace_edu_depr$income_4cat <- factor(gsv_mesa_noNArace_edu_depr$income_4cat)
+
+
 gsv_mesa_noNArace_edu_depr_sm <- gsv_mesa_noNArace_edu_depr %>% 
   dplyr::select(idno, race1c, educ1, educ_3cat, F1_PC2, f1_pc2_3cat, n_depr,
-        age1c, agecat1c, gender1, income1, income_3cat, year, site1c, site4c, 
+        age1c, agecat1c, gender1, income1, income_4cat, year, site1c, site4c, 
         green_total_2005_2007, tree_total_2005_2007, grass_2005_2007, green_other_2005_2007)
+
+glimpse(gsv_mesa_noNArace_edu_depr_sm)
+out_dir <- "/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/data/"
+readr::write_csv(x = gsv_mesa_noNArace_edu_depr_sm, 
+                 file = paste0(out_dir, "gsv_mesa_noNArace_edu_depr_sm.csv"), 
+                 num_threads = 3)
+
 
 ## check covar missingness------
 glimpse(gsv_mesa_noNArace_edu_depr_sm)
@@ -274,7 +298,7 @@ strata_old_table # looks good
 out_dir <- "/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/data/"
 readr::write_csv(x = race_edu_depr_strata, 
                 file = paste0(out_dir, "race_edu_depr_strata.csv"), 
-                num_threads = 3,) 
+                num_threads = 3) 
 
 ######## testing out doing normal score transformation of  the greenness measures to use in models
 #race_edu_depr_strata$green_totalNST = blom(race_edu_depr_strata$green_total)
@@ -370,7 +394,7 @@ model1_race_edu_f1_greentotal_ln <- brm(green_total_2005_2007~1+age1c+gender1+in
                                        family = "lognormal",
                                         warmup = 5000,
                                         iter = 10000,
-                                       chains=1, seed=123)
+                                       chains=3, seed=123)
 
 model1_race_edu_f1_greentotal_ln # it ran....but pretty close to same as with normal transformed
                                 # Exponentiating estimates leave me with way smaller variances than with my orig model
@@ -602,13 +626,13 @@ View(pred.means.model1_race_edu_f1_green_other)
 ### total greenspace ####
 model2_race_edu_f1_greentotal
 # Variance at race x edu strata strata level model 2 (sd intercept estimate)^2
-1.93^2 # 3.7249
+1.94^2 # 3.7636
 
 # Variance at individual level model 2 (fam specific params sigma)^2
-8.42^2 # 70.8964
+8.17^2 # 66.7489
 
 # Calculate adjusted VPC model 2
-round(3.7249 / (3.7249 + 70.8964)*100,2) # 4.99%
+round(3.7636 / (3.7636 + 66.7489)*100,2) # 5.34%
 
 # Proportional Change in Variance (PCV) = Assessment of the extent to which between-stratum 
 # inequalities are explained by additive vs. interactive/residual effects

@@ -66,7 +66,7 @@ gsv_mesa_popden_nona$educ_3cat <- factor(gsv_mesa_popden_nona$educ_3cat)
 gsv_mesa_popden_nona$f1_pc2_3cat <- factor(gsv_mesa_popden_nona$f1_pc2_3cat)
 gsv_mesa_popden_nona$n_depr <- factor(gsv_mesa_popden_nona$n_depr)
 gsv_mesa_popden_nona$site4c <- factor(gsv_mesa_popden_nona$site4c)
-gsv_mesa_popden_nona$income1 <- factor(gsv_mesa_popden_nona$income1)
+#gsv_mesa_popden_nona$income1 <- factor(gsv_mesa_popden_nona$income1)
 
 
 ###subset for non-missing race x edu x f1_pc2 
@@ -76,16 +76,36 @@ gsv_mesa_popden_noNArace_edu_depr <- gsv_mesa_popden_nona %>%
   filter(!is.na(n_depr)) %>% 
   filter(!is.na(green_other_2005_2007)) %>%  # ... non-missing outcomes
   filter(!is.na(income1)) # non-missing income
-dim(gsv_mesa_popden_noNArace_edu_depr) # 5613 (a fair bit of missing income)
+dim(gsv_mesa_popden_noNArace_edu_depr) # 5246 (a fair bit of missing income)
 glimpse(gsv_mesa_popden_noNArace_edu_depr)
+
+## recode income to 4-cat-----
+glimpse(gsv_mesa_popden_noNArace_edu_depr)
+gsv_mesa_popden_noNArace_edu_depr <- gsv_mesa_popden_noNArace_edu_depr %>% 
+  mutate(income_4cat = case_when(
+    (income1 >= 1 & income1 <= 6) ~ 1, # <$25,000       
+    (income1 >= 7 & income1 <= 10) ~ 2, # $25k - 49,999       
+    (income1 == 11) ~ 3, # $50k - $74999         
+    (income1 == 12 | income1 == 13) ~ 4, # >$75k
+    TRUE ~ NA
+  ))
+
+xtabs( ~ income_4cat + income1, gsv_mesa_popden_noNArace_edu_depr, addNA = TRUE, na.action = NULL) # looks good
+gsv_mesa_popden_noNArace_edu_depr$income1 <- factor(gsv_mesa_popden_noNArace_edu_depr$income1)
+gsv_mesa_popden_noNArace_edu_depr$income_4cat <- factor(gsv_mesa_popden_noNArace_edu_depr$income_4cat)
+
 gsv_mesa_popden_noNArace_edu_depr_sm <- gsv_mesa_popden_noNArace_edu_depr %>% 
   dplyr::select(idno, race1c, educ1, educ_3cat, F1_PC2, f1_pc2_3cat, n_depr,
-         age1c, agecat1c, gender1, income1, income_3cat, year, site1c, site4c, 
+         age1c, agecat1c, gender1, income1, income_4cat, year, site1c, site4c, 
          green_total_2005_2007, tree_total_2005_2007, grass_2005_2007, green_other_2005_2007, popdenmi_nowat, popden_dichot)
-
+glimpse(gsv_mesa_popden_noNArace_edu_depr_sm) # 5246 21
 head(gsv_mesa_popden_noNArace_edu_depr_sm)
 dim(gsv_mesa_popden_noNArace_edu_depr_sm) # 5246 21
 
+out_dir <- "/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/data/"
+readr::write_csv(x = gsv_mesa_popden_noNArace_edu_depr_sm, 
+                 file = paste0(out_dir, "gsv_mesa_popden_noNArace_edu_depr_sm.csv"), 
+                 num_threads = 3)
 
 # create 2 subsets: popden_dichot == 0 and popden_dichot ==1
 gsv_mesa_lowdens <-gsv_mesa_popden_noNArace_edu_depr_sm %>% 
@@ -95,6 +115,7 @@ gsv_mesa_highdens <-gsv_mesa_popden_noNArace_edu_depr_sm %>%
   filter(popden_dichot==1)
 dim(gsv_mesa_highdens) # 2600
 2646+2600 # 5246 - yep
+
 
 # step 1 intersectional strata & size checks #################
 ### 1a. create intersectional strata ######################################

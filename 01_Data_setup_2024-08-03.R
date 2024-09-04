@@ -3,7 +3,7 @@
 # Author: Cameron Reimer, and Marcia P. Jimenez
 # modified by Tara Jenson
 # Created: 07/24/2024
-# Last Edited: 08/03/2024
+# Last Edited: 09/03/2024
 
 library(dplyr)
 library(tidyverse)
@@ -125,22 +125,23 @@ for(i in 1:nrow(gsv_dict)){
 
 ### 4. Export Data -------------------------------------------------------------
 # 
+glimpse(long_df) # 52,752 rows
 out_dir <- "/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/data"
 #  
  readr::write_csv(x = long_df,
                   file = paste0("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/data/gsv_2000_2006_long_072424.csv"),
                   num_threads = 3) # adding option param to change NA to.
 # 
-gsv_2000_2006 <- readr::read_csv(paste0(out_dir, "gsv_2000_2006_long_072424.csv"))
+gsv_2000_2006 <- long_df
 
-### 5. Subset to 2005-2006 for greenness/EJ/MAIHDA analysis ------
+### 5. Subset to 2000-2002 for baseline greenness/EJ/MAIHDA analysis ------
 glimpse (gsv_2000_2006) # 52,752 (7536 * 7 yrs)
-gsv_2005_2006 <- gsv_2000_2006 %>% 
-  filter (year==2005 | year==2006)
-glimpse(gsv_2005_2006) # 15,072 (7536 * 2 yrs)
-head(gsv_2005_2006)
-readr::write_csv(x = gsv_2005_2006,
-                 file = paste0("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/data/gsv_2005_2006.csv"),
+gsv_2000_thru_2002 <- gsv_2000_2006 %>% 
+  filter (year==2000 | year==2001 | year==2002)
+glimpse(gsv_2000_thru_2002) # 22,608 (7536 * 3 yrs)
+head(gsv_2000_thru_2002)
+readr::write_csv(x = gsv_2000_thru_2002,
+                 file = paste0("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/data/gsv_2000_thru_2002.csv"),
                  num_threads = 3) # adding option param to change NA to.
 
 

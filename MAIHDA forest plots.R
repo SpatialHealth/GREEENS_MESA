@@ -70,7 +70,7 @@ predicted_greentotal_results$edu_num <- factor(predicted_greentotal_results$edu_
                                                          "Bachelor's \nor higher"))
 
 predicted_greentotal_results$depr_num <- factor(predicted_greentotal_results$depr_num, levels = c(3,2,1), 
-                                                labels=c("High", "Moderate", "Low"))  # changing to NSES verbiage: 3 = high NSES, 2 = mod NSES, 1 = low NSES
+                                                labels=c("Hi", "M", "Lo"))  # changing to NSES verbiage: 3 = high NSES, 2 = mod NSES, 1 = low NSES
 # A higher cont value F1_PC2 indicates worse SES
 # so highest tertile F1_PC2 --> n_depr = 1, denotes worse NSES
 # e.g. lowest/neg tertile F1_PC2 --> n_depr = 3, denotes higher NSES
@@ -150,7 +150,7 @@ predicted_greentotal_lowdens_results$edu_num <- factor(predicted_greentotal_lowd
                                                           "Bachelor's \nor higher"))
 
 predicted_greentotal_lowdens_results$depr_num <- factor(predicted_greentotal_lowdens_results$depr_num, levels = c(3,2,1), 
-                                                        labels=c("High", "Moderate", "Low"))  # changing to NSES verbiage: least = high, mod = mod, most = low 
+                                                        labels=c("Hi", "M", "Lo"))  # changing to NSES verbiage: least = high, mod = mod, most = low 
 head(predicted_greentotal_lowdens_results)
 
 
@@ -204,7 +204,7 @@ head(predicted_greentotal_results)
 
 ## Figure 2 a, b, c & d -------
 greentotal <- ggplot(data=predicted_greentotal_results, aes((reorder(x = NSES, desc(NSES))), y = Estimate, ymin=LowerLevel, ymax=UpperLevel))+
-  geom_pointrange(aes (color = EducationLevel, shape=EducationLevel), size=0.7) + 
+  geom_pointrange(aes (color = EducationLevel, shape=EducationLevel), size=1) + 
   geom_errorbar(aes (color = EducationLevel), width=0.5) + 
   geom_hline(yintercept=mean(predicted_greentotal_results$Estimate), linetype="dashed", color = "black") +
   ylim(0, 46) +
@@ -212,11 +212,12 @@ greentotal <- ggplot(data=predicted_greentotal_results, aes((reorder(x = NSES, d
   scale_color_manual(values=c("orchid", "skyblue4", "darkgoldenrod2"))+
   facet_nested(~ RaceEthnicity + EducationLevel, nest_line = TRUE) + 
   theme_bw()+ # sets white background with gray grid marks
-  theme(legend.position = "none", axis.text.x = element_text(size = 10, angle = 45, vjust = 1.1, hjust=1),
+  theme(legend.position = "none", axis.text.x = element_text(face = "bold", size = 12, vjust = 1.1),
+        axis.text.y = element_text(face = "bold", size = 18, vjust = 1.1),
         strip.background = element_rect(colour = "black", linewidth = 1) ,
         #plot.title = element_text(face = "bold"), 
-        axis.title.y = element_text(face = "bold", angle = 0, vjust = 0.5),
-        axis.title.x = element_text(face = "bold")) + 
+        axis.title.y = element_text(face = "bold", angle = 0, vjust = 0.5, size = 18),
+        axis.title.x = element_text(face = "bold", size = 18)) + 
   labs(x = "Neighborhood SES", y = "%\n Predicted\n Total\n Greenness") # leaving off title to do in SnagIt instead
 # labs(title = "Figure 2. Predicted mean percent street-view of measures of greenness with 95% credible intervals across intersectional strata 
 #in the simple intersectional model. MESA 2005-2007, N=5,246.
