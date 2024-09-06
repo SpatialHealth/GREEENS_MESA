@@ -20,78 +20,59 @@ setwd("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Gr
 
 
 ###Read in combined GSV-Mesa data file 
-gsv_mesa_popden_noNArace_edu_depr_forTables <- read.csv("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/data/gsv_mesa_popden_noNArace_edu_depr_sm.csv")
-glimpse(gsv_mesa_popden_noNArace_edu_depr_forTables)
-head(gsv_mesa_popden_noNArace_edu_depr_sm,20)
-dim(gsv_mesa_popden_noNArace_edu_depr_sm) # 5246
+race_edu_depr_strata_forTables <- read.csv("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/data/race_edu_depr_strata.csv")
+glimpse(race_edu_depr_strata_forTables)
+head(race_edu_depr_strata_forTables,20)
+dim(race_edu_depr_strata_forTables) # 5858
 
 ###set cat vars to factors 
-gsv_mesa_popden_noNArace_edu_depr_forTables$race1c <- factor(gsv_mesa_popden_noNArace_edu_depr_forTables$race1c)
-gsv_mesa_popden_noNArace_edu_depr_forTables$gender1 <- factor(gsv_mesa_popden_noNArace_edu_depr_forTables$gender1)
-gsv_mesa_popden_noNArace_edu_depr_forTables$educ_3cat <- factor(gsv_mesa_popden_noNArace_edu_depr_forTables$educ_3cat)
-gsv_mesa_popden_noNArace_edu_depr_forTables$f1_pc2_3cat <- factor(gsv_mesa_popden_noNArace_edu_depr_forTables$f1_pc2_3cat)
-gsv_mesa_popden_noNArace_edu_depr_forTables$n_depr <- factor(gsv_mesa_popden_noNArace_edu_depr_forTables$n_depr)
-gsv_mesa_popden_noNArace_edu_depr_forTables$site4c <- factor(gsv_mesa_popden_noNArace_edu_depr_forTables$site4c)
-gsv_mesa_popden_noNArace_edu_depr_forTables$income1 <- factor(gsv_mesa_popden_noNArace_edu_depr_forTables$income1)
-gsv_mesa_popden_noNArace_edu_depr_forTables$income_4cat <- factor(gsv_mesa_popden_noNArace_edu_depr_forTables$income_4cat)
+race_edu_depr_strata_forTables$race1c <- factor(race_edu_depr_strata_forTables$race1c)
+race_edu_depr_strata_forTables$gender1 <- factor(race_edu_depr_strata_forTables$gender1)
+race_edu_depr_strata_forTables$agecat1c <- factor(race_edu_depr_strata_forTables$agecat1c)
+race_edu_depr_strata_forTables$educ_3cat <- factor(race_edu_depr_strata_forTables$educ_3cat)
+race_edu_depr_strata_forTables$ndepr_reord <- factor(race_edu_depr_strata_forTables$ndepr_reord)
+race_edu_depr_strata_forTables$site1c <- factor(race_edu_depr_strata_forTables$site1c)
+race_edu_depr_strata_forTables$income1 <- factor(race_edu_depr_strata_forTables$income1)
+race_edu_depr_strata_forTables$income_4cat <- factor(race_edu_depr_strata_forTables$income_4cat)
 
-
-# no need for this next section as importing data already with no NA for strata vars
-###subset for non-missing race x edu x f1_pc2 
-#sum(is.na(gsv_mesa$race1c)) # 215
-#sum(is.na(gsv_mesa$educ_3cat)) # 238
-#sum(is.na(gsv_mesa$f1_pc2_3cat)) # 1265
-
-#gsv_mesa_noNAedu_f1pc2 <- gsv_mesa %>% 
-#  filter(!is.na(race1c)) %>%
-#  filter(!is.na(educ_3cat)) %>% # subset to non-missing race/eth x edu x f1_pc2 strata
-#  filter(!is.na(f1_pc2_3cat))
-#dim(gsv_mesa_noNAedu_f1pc2) # 5536
-
-#gsv_mesa_noNAedu_f1pc2_sm <- gsv_mesa_noNAedu_f1pc2 %>% select(idno, race1c, educ_3cat, f1_pc2_3cat,
-#                                                               age1c, agecat1c, gender1, income1, income_3cat, year, green_total, 
-#                                                               tree_total, green_other, grass_500, site1c, site4c, F1_PC2)
-
-
-# swap in gsv_mesa_popden_noNArace_edu_depr_sm data from stratified analyses
-glimpse(gsv_mesa_popden_noNArace_edu_depr_forTables) # 5246
+glimpse(race_edu_depr_strata_forTables) # 5858
 
 ###set cat vars to factors and assign labels for levels
-gsv_mesa_popden_noNArace_edu_depr_forTables$race1c <- factor(gsv_mesa_popden_noNArace_edu_depr_forTables$race1c, levels=c(1,2,3,4),
+race_edu_depr_strata_forTables$race1c <- factor(race_edu_depr_strata_forTables$race1c, levels=c(1,2,3,4),
                           labels=c("White", 
                                    "Chinese American",
                                    "Black",
                                    "Hispanic"))
 
-gsv_mesa_popden_noNArace_edu_depr_forTables$educ_3cat <- factor(gsv_mesa_popden_noNArace_edu_depr_forTables$educ_3cat, levels = c(1,2,3), 
-                             labels = c("High School/GED or less", #reference
+race_edu_depr_strata_forTables$educ_3cat <- factor(race_edu_depr_strata_forTables$educ_3cat, levels = c(1,2,3), 
+                             labels = c("High School/GED or less", 
                                         "Some college", 
                                         "Bachelor's Degree or higher"))
 
-gsv_mesa_popden_noNArace_edu_depr_forTables$n_depr <- factor(gsv_mesa_popden_noNArace_edu_depr_forTables$n_depr, levels = c(3,2,1), 
+race_edu_depr_strata_forTables$ndepr_reord <- factor(race_edu_depr_strata_forTables$ndepr_reord, levels = c(3,2,1), 
                                labels=c("High", "Moderate", "Low"))  # changing to NSES verbiage: least = high, mod = mod, most = low  
 
-gsv_mesa_popden_noNArace_edu_depr_forTables$gender1 <- factor(gsv_mesa_popden_noNArace_edu_depr_forTables$gender1, levels = c(0,1), 
+race_edu_depr_strata_forTables$gender1 <- factor(race_edu_depr_strata_forTables$gender1, levels = c(0,1), 
                                                        labels = c("Female", "Male"))
 
-gsv_mesa_popden_noNArace_edu_depr_forTables$popden_dichot <- factor(gsv_mesa_popden_noNArace_edu_depr_forTables$popden_dichot, levels = c(0,1), 
-                           labels = c("<7,500 people per square mile", ">=7,500 people per square mile"))
+race_edu_depr_strata_forTables$popden_dichot <- factor(race_edu_depr_strata_forTables$popden_dichot, levels = c(0,1), 
+                           labels = c("<=8,000 people per square mile", ">8,000 people per square mile"))
 
-gsv_mesa_popden_noNArace_edu_depr_forTables$income_4cat <- factor(gsv_mesa_popden_noNArace_edu_depr_forTables$income_4cat, levels = c(1,2,3,4), 
+race_edu_depr_strata_forTables$income_4cat <- factor(race_edu_depr_strata_forTables$income_4cat, levels = c(1,2,3,4), 
                            labels = c("< $25,000", "$25,000-$49,999", "$50,000-$74,999", "$75,000+"))
 
-gsv_mesa_popden_noNArace_edu_depr_forTables$site4c <- factor(gsv_mesa_popden_noNArace_edu_depr_forTables$site4c, levels = c(3,4,5,6,7,8), 
+race_edu_depr_strata_forTables$site1c <- factor(race_edu_depr_strata_forTables$site1c, levels = c(3,4,5,6,7,8), 
                           labels = c("WFU", "COL", "JHU", "UMN", "NWU", "UCLA"))
 
-gsv_mesa_popden_noNArace_edu_depr_forTables$agecat1c <- factor(gsv_mesa_popden_noNArace_edu_depr_forTables$agecat1c, levels=c(1,2,3,4),
+race_edu_depr_strata_forTables$agecat1c <- factor(race_edu_depr_strata_forTables$agecat1c, levels=c(1,2,3,4),
                                            labels=c("45 - 54 years",
                                                     "55 - 64 years",
                                                     "65 - 74 years",
                                                     "75 - 84 years"))
 
-glimpse(gsv_mesa_popden_noNArace_edu_depr_forTables)
-sum(gsv_mesa_popden_noNArace_edu_depr_forTables$popden_dichot =="<7,500 people per square mile")
-sum(gsv_mesa_popden_noNArace_edu_depr_forTables$popden_dichot ==">=7,500 people per square mile")
+glimpse(race_edu_depr_strata_forTables)
+sum(race_edu_depr_strata_forTables$popden_dichot =="<=8,000 people per square mile")
+sum(race_edu_depr_strata_forTables$popden_dichot ==">8,000 people per square mile")
 # Create Table 1 ------------------------------------------------
 
 ###overall Ns/%s and means/SDs -----------------
@@ -103,20 +84,20 @@ contVars <-
     "age1c",
     "F1_PC2",
     "popdenmi_nowat",
-    "green_total_2005_2007",
-    "tree_total_2005_2007",
-    "grass_2005_2007",
-    "green_other_2005_2007"
+    "green_total",
+    "tree_total",
+    "grass",
+    "green_other"
   )
 catVars <-
   c(
     "race1c",
     "educ_3cat",
-    "n_depr",
+    "ndepr_reord",
     "popden_dichot",
     "gender1",
     "income_4cat",
-    "site4c",
+    "site1c",
     "agecat1c"
   )  
 
@@ -124,7 +105,7 @@ allvars <- c(contVars, catVars)
 table1 <-
   CreateTableOne(
     vars = allvars,
-    data = gsv_mesa_popden_noNArace_edu_depr_forTables,
+    data = race_edu_depr_strata_forTables,
     factorVars = catVars
   )
 table1
@@ -158,18 +139,19 @@ export(t1_out_df, here::here(path, "table1_test.csv")) # this exports only the v
  
 contVars_greens <-
   c(
-    "green_total_2005_2007",
-    "tree_total_2005_2007",
-    "grass_2005_2007",
-    "green_other_2005_2007"
+    "green_total",
+    "tree_total",
+    "grass",
+    "green_other"
   )
 
 #repeat this for each of the strata cat vars listed above, kick out to csv to cut/paste into main table
+# "race1c","educ_3cat","ndepr_reord","popden_dichot","gender1","income_4cat","site1c","agecat1c"
 table1_greens <-
   CreateTableOne(
     vars = contVars_greens,
-    strata = "gender1" ,
-    data = gsv_mesa_popden_noNArace_edu_depr_forTables,
+    strata = "agecat1c" ,
+    data = race_edu_depr_strata_forTables,
   )
 table1_greens
 
