@@ -6,57 +6,14 @@
 library(haven)
 library(tidyverse)
 
-
-# pull popn density var in from exam 4 datafile
-census_df <- read_sas("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/data/MESAa23_CensTrctSES_20220824/MESAa23_CensTrctSES_20220824.sas7bdat")
-head(census_df)
-census_df_sm <- census_df %>% 
-  filter(EXAM==4) %>% #select for exam 4 values only
-  dplyr::select(idno,popdenmi_nowat) # keep only necess vars
-head(census_df_sm)
-dim(census_df_sm) #5693
-
-# pull gsv2005-2007_mesa data
+# pull main analysis data
 gsv20052007_mesa_forstrat_analysis <- read.csv("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/data/gsv20052007_mesa.csv")
 head(gsv20052007_mesa_forstrat_analysis,20)
 dim(gsv20052007_mesa_forstrat_analysis) # 6594 | 25
 glimpse(gsv20052007_mesa_forstrat_analysis) 
 
-# join GSV+mesa data with census data
-gsv_mesa_popden <- inner_join(gsv20052007_mesa_forstrat_analysis,census_df_sm,"idno")
-head(gsv_mesa_popden) 
-dim (gsv_mesa_popden) # 5618   26
 
-# distrib of pop density
-summary(gsv_mesa_popden$popdenmi_nowat)
-# Min.   1st Qu.    Median      Mean   3rd Qu.      Max.      NA's 
-# 3.19   2913.68   7499.39  25103.88   20588.62   200363.52   5 
 
-gsv_mesa_popden %>% 
-  filter(popdenmi_nowat >= 1000) %>% 
-  summarise(count = n())
-
-5134 / 5618 # 91% of our sample is considered urban
-
-sum(is.na(gsv_mesa_popden$popdenmi_nowat)) # 5 missing
-
-gsv_mesa_popden %>% 
-  filter(!is.na(popdenmi_nowat) & popdenmi_nowat >= 1000) %>% 
-  summarise(count = n())
-5134/5618*100 # 91% have >1000 ppl per sq mile - Lilah confirmed this is expected
-
-gsv_mesa_popden_nona <- gsv_mesa_popden %>% 
-  filter(!is.na(popdenmi_nowat)) %>% 
-  mutate(
-    popden_dichot = case_when(
-      popdenmi_nowat < 7500 ~ 0,   # lower pop dens < 7500
-                      TRUE ~ 1     # higher pop dens > 7500, no missing values so no case for
-    )  
-  )
-dim(gsv_mesa_popden_nona) # 5613 dropped the 5 with missing popdens
-sum(gsv_mesa_popden_nona$popden_dichot ==0)
-sum(gsv_mesa_popden_nona$popden_dichot ==1)
-2883+2730 # all good
 
 # now let's run the total greenness models stratified by <7500 and > 7500
 ###set cat vars to factors 

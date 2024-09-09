@@ -17,28 +17,27 @@ library(ggtext)
 
 #0. Import results table(s) ------------------------------------------------------------------
 
-predicted_greentotal_results <- read.csv("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/results/predictedgreentotalforplots_redo.csv")
+predicted_greentotal_results <- read.csv("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/results/predictedgreentotalforplots_redo_exam1.csv")
 head(predicted_greentotal_results)
 dim(predicted_greentotal_results) 
 view(predicted_greentotal_results) 
 
-predicted_greentotal_results_ln <- read.csv("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/results/predictedgreentotalforplots_nl_redo.csv")
+predicted_greentotal_results_ln <- read.csv("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/results/predictedgreentotalforplots_nl_redo_exam1.csv")
 head(predicted_greentotal_results_ln)
 dim(predicted_greentotal_results_ln) 
 view(predicted_greentotal_results_ln) 
 
-predicted_treesonly_results <- read.csv("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/results/predictedtreesonlyforplots_redo.csv")
+predicted_treesonly_results <- read.csv("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/results/predictedtreesonlyforplots_redo_exam1.csv")
 head(predicted_treesonly_results)
 dim(predicted_treesonly_results) 
 view(predicted_treesonly_results) 
 
-predicted_grassonly_results <- read.csv("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/results/predictedgrassonlyforplots_redo.csv")
+predicted_grassonly_results <- read.csv("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/results/predictedgrassonlyforplots_redo_exam1.csv")
 head(predicted_grassonly_results)
 dim(predicted_grassonly_results) 
-
 view(predicted_grassonly_results)
 
-predicted_greenother_results <- read.csv("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/results/predictedgreenotherforplots_redo.csv")
+predicted_greenother_results <- read.csv("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/results/predictedgreenotherforplots_redo_exam1.csv")
 head(predicted_greenother_results)
 dim(predicted_greenother_results) 
 view(predicted_greenother_results)
@@ -58,99 +57,99 @@ view(predicted_greentotal_highdens_results)
 
 
 ###set cat vars to factors and assign labels for levels 
-predicted_greentotal_results$race_num <- factor(predicted_greentotal_results$race_num, levels=c(1,2,3,4),
-                                           labels=c("White", 
+predicted_greentotal_results$race_num <- factor(predicted_greentotal_results$race_num, levels=c(3,2,4,1),
+                                           labels=c("Black", 
                                                     "Chinese American",
-                                                    "Black",
-                                                    "Hispanic"))
+                                                    "Hispanic",
+                                                    "White"))
 
 predicted_greentotal_results$edu_num <- factor(predicted_greentotal_results$edu_num, levels = c(1,2,3), 
-                                              labels = c("High School \nor less", #reference
+                                              labels = c(" High School \nor less", #reference
                                                          "Some \ncollege", 
                                                          "Bachelor's \nor higher"))
 
 predicted_greentotal_results$depr_num <- factor(predicted_greentotal_results$depr_num, levels = c(3,2,1), 
-                                                labels=c("Hi", "M", "Lo"))  # changing to NSES verbiage: 3 = high NSES, 2 = mod NSES, 1 = low NSES
+                                                labels=c("High", "Mod", "Low"))  # changing to NSES verbiage: 3 = high NSES, 2 = mod NSES, 1 = low NSES
 # A higher cont value F1_PC2 indicates worse SES
 # so highest tertile F1_PC2 --> n_depr = 1, denotes worse NSES
 # e.g. lowest/neg tertile F1_PC2 --> n_depr = 3, denotes higher NSES
 predicted_greentotal_results # checking compared with .csv file numbers looks good
-head(predicted_greentotal_results)
+head(predicted_greentotal_results,40) 
 
-predicted_greentotal_results_ln$race_num <- factor(predicted_greentotal_results_ln$race_num, levels=c(1,2,3,4),
-                                                labels=c("White", 
+predicted_greentotal_results_ln$race_num <- factor(predicted_greentotal_results_ln$race_num, levels=c(3,2,4,1),
+                                                labels=c("Black", 
                                                          "Chinese American",
-                                                         "Black",
-                                                         "Hispanic"))
+                                                         "Hispanic",
+                                                         "White"))
 
 predicted_greentotal_results_ln$edu_num <- factor(predicted_greentotal_results_ln$edu_num, levels = c(1,2,3), 
-                                               labels = c("High School \nor less", #reference
+                                               labels = c(" High School \nor less", #reference
                                                           "Some \ncollege", 
                                                           "Bachelor's \nor higher"))
 
 predicted_greentotal_results_ln$depr_num <- factor(predicted_greentotal_results_ln$depr_num, levels = c(3,2,1), 
-                                                   labels=c("High", "Moderate", "Low"))  # changing to NSES verbiage: least = high, mod = mod, most = low  
+                                                   labels=c("High", "Mod", "Low"))  # changing to NSES verbiage: least = high, mod = mod, most = low  
 head(predicted_greentotal_results_ln)
 
-predicted_treesonly_results$race_num <- factor(predicted_treesonly_results$race_num, levels=c(1,2,3,4),
-                                                labels=c("White", 
-                                                         "Chinese American",
-                                                         "Black",
-                                                         "Hispanic"))
+predicted_treesonly_results$race_num <- factor(predicted_treesonly_results$race_num, levels=c(3,2,4,1),
+                                               labels=c("Black", 
+                                                        "Chinese American",
+                                                        "Hispanic",
+                                                        "White"))
 
 predicted_treesonly_results$edu_num <- factor(predicted_treesonly_results$edu_num, levels = c(1,2,3), 
-                                               labels = c("High School \nor less", #reference
+                                               labels = c(" High School \nor less", #reference
                                                           "Some \ncollege", 
                                                           "Bachelor's \nor higher"))
 
 predicted_treesonly_results$depr_num <- factor(predicted_treesonly_results$depr_num, levels = c(3,2,1), 
-                                               labels=c("High", "Moderate", "Low"))  # changing to NSES verbiage: least = high, mod = mod, most = low 
+                                               labels=c("High", "Mod", "Low"))  # changing to NSES verbiage: least = high, mod = mod, most = low 
 head(predicted_treesonly_results)
 
-predicted_grassonly_results$race_num <- factor(predicted_grassonly_results$race_num, levels=c(1,2,3,4),
-                                               labels=c("White", 
+predicted_grassonly_results$race_num <- factor(predicted_grassonly_results$race_num, levels=c(3,2,4,1),
+                                               labels=c("Black", 
                                                         "Chinese American",
-                                                        "Black",
-                                                        "Hispanic"))
+                                                        "Hispanic",
+                                                        "White"))
 
 predicted_grassonly_results$edu_num <- factor(predicted_grassonly_results$edu_num, levels = c(1,2,3), 
-                                              labels = c("High School \nor less", #reference
+                                              labels = c(" High School \nor less", #reference
                                                          "Some \ncollege", 
                                                          "Bachelor's \nor higher"))
 
 predicted_grassonly_results$depr_num <- factor(predicted_grassonly_results$depr_num, levels = c(3,2,1), 
-                                               labels=c("High", "Moderate", "Low"))  # changing to NSES verbiage: least = high, mod = mod, most = low  
+                                               labels=c("High", "Mod", "Low"))  # changing to NSES verbiage: least = high, mod = mod, most = low  
 head(predicted_grassonly_results)
 
-predicted_greenother_results$race_num <- factor(predicted_greenother_results$race_num, levels=c(1,2,3,4),
-                                               labels=c("White", 
-                                                        "Chinese American",
-                                                        "Black",
-                                                        "Hispanic"))
+predicted_greenother_results$race_num <- factor(predicted_greenother_results$race_num, levels=c(3,2,4,1),
+                                                labels=c("Black", 
+                                                         "Chinese American",
+                                                         "Hispanic",
+                                                         "White"))
 
 predicted_greenother_results$edu_num <- factor(predicted_greenother_results$edu_num, levels = c(1,2,3), 
-                                              labels = c("High School \nor less", #reference
+                                              labels = c(" High School \nor less", #reference
                                                          "Some \ncollege", 
                                                          "Bachelor's \nor higher"))
 
 predicted_greenother_results$depr_num <- factor(predicted_greenother_results$depr_num, levels = c(3,2,1), 
-                                                labels=c("High", "Moderate", "Low"))  # changing to NSES verbiage: least = high, mod = mod, most = low  
+                                                labels=c("High", "Mod", "Low"))  # changing to NSES verbiage: least = high, mod = mod, most = low  
 head(predicted_greenother_results)
 
 # to save space just swap out for low & high density
-predicted_greentotal_lowdens_results$race_num <- factor(predicted_greentotal_lowdens_results$race_num, levels=c(1,2,3,4),
-                                                labels=c("White", 
-                                                         "Chinese American",
-                                                         "Black",
-                                                         "Hispanic"))
+predicted_greentotal_lowdens_results$race_num <- factor(predicted_greentotal_lowdens_results$race_num, levels=c(3,2,4,1),
+                                              labels=c("Black", 
+                                                       "Chinese American",
+                                                       "Hispanic",
+                                                       "White"))
 
 predicted_greentotal_lowdens_results$edu_num <- factor(predicted_greentotal_lowdens_results$edu_num, levels = c(1,2,3), 
-                                               labels = c("High School \nor less", #reference
+                                               labels = c(" High School \nor less", #reference
                                                           "Some \ncollege", 
                                                           "Bachelor's \nor higher"))
 
 predicted_greentotal_lowdens_results$depr_num <- factor(predicted_greentotal_lowdens_results$depr_num, levels = c(3,2,1), 
-                                                        labels=c("Hi", "M", "Lo"))  # changing to NSES verbiage: least = high, mod = mod, most = low 
+                                                        labels=c("High", "Mod", "Low"))  # changing to NSES verbiage: least = high, mod = mod, most = low 
 head(predicted_greentotal_lowdens_results)
 
 
@@ -207,13 +206,15 @@ greentotal <- ggplot(data=predicted_greentotal_results, aes((reorder(x = NSES, d
   geom_pointrange(aes (color = EducationLevel, shape=EducationLevel), size=1) + 
   geom_errorbar(aes (color = EducationLevel), width=0.5) + 
   geom_hline(yintercept=mean(predicted_greentotal_results$Estimate), linetype="dashed", color = "black") +
-  ylim(0, 46) +
+  ylim(0, 48) +
   #scale_color_viridis_d() +
   scale_color_manual(values=c("orchid", "skyblue4", "darkgoldenrod2"))+
   facet_nested(~ RaceEthnicity + EducationLevel, nest_line = TRUE) + 
   theme_bw()+ # sets white background with gray grid marks
-  theme(legend.position = "none", axis.text.x = element_text(face = "bold", size = 12, vjust = 1.1),
-        axis.text.y = element_text(face = "bold", size = 18, vjust = 1.1),
+  theme(legend.position = "none", 
+        axis.text.x = element_text(face = "bold", size = 11, angle = 45, hjust = 1.1, vjust = 1.2),
+        axis.text.y = element_text(face = "bold", size = 18),
+        strip.text.x = element_text(face = "bold", size = 11),
         strip.background = element_rect(colour = "black", linewidth = 1) ,
         #plot.title = element_text(face = "bold"), 
         axis.title.y = element_text(face = "bold", angle = 0, vjust = 0.5, size = 18),
@@ -226,18 +227,21 @@ greentotal <- ggplot(data=predicted_greentotal_results, aes((reorder(x = NSES, d
 greentotal 
 
 treesonly <- ggplot(data=predicted_treesonly_results, aes((reorder(x = NSES, desc(NSES))), y = Estimate, ymin=LowerLevel, ymax=UpperLevel))+
-  geom_pointrange(aes (color = EducationLevel, shape=EducationLevel), size=0.7) + 
+  geom_pointrange(aes (color = EducationLevel, shape=EducationLevel), size=1) + 
   geom_errorbar(aes (color = EducationLevel), width=0.5) + 
   geom_hline(yintercept=mean(predicted_treesonly_results$Estimate), linetype="dashed", color = "black") +
   ylim(0, 35) +
   scale_color_manual(values=c("orchid", "skyblue4", "darkgoldenrod2"))+
   facet_nested(~ RaceEthnicity + EducationLevel, nest_line = TRUE) + 
   theme_bw()+ # sets white background with gray grid marks
-  theme(legend.position = "none", axis.text.x = element_text(size = 10, angle = 45, vjust = 1.1, hjust=1),
+  theme(legend.position = "none", 
+        axis.text.x = element_text(face = "bold", size = 11, angle = 45, vjust = 1.1, hjust=1.2),
+        axis.text.y = element_text(face = "bold", size = 18),
+        strip.text.x = element_text(face = "bold", size = 11),
         strip.background = element_rect(colour = "black", linewidth = 1) ,
-        plot.title = element_text(face = "bold"), 
-        axis.title.y = element_text(face = "bold", angle = 0, vjust = 0.5),
-        axis.title.x = element_text(face = "bold")) + 
+        #plot.title = element_text(face = "bold"), 
+        axis.title.y = element_text(face = "bold", angle = 0, vjust = 0.5, size = 18),
+        axis.title.x = element_text(face = "bold", size = 18)) + 
   labs(x = "Neighborhood SES", y = "%\n Predicted\n Trees") # leaving of "B" - doing that instead via SnagIt editor
   #theme(legend.position = "none", axis.text.x = element_text(size = 10, angle = 45, vjust = 1.1, hjust=1))+ # no legend, sets x-axis text size and angle
   #theme(strip.background = element_rect(colour = "black", linewidth = 1)) + # creates rectangle around nested var labels
@@ -248,18 +252,21 @@ treesonly <- ggplot(data=predicted_treesonly_results, aes((reorder(x = NSES, des
 treesonly 
 
 grassonly <- ggplot(data=predicted_grassonly_results, aes((reorder(x = NSES, desc(NSES))), y = Estimate, ymin=LowerLevel, ymax=UpperLevel))+
-  geom_pointrange(aes (color = EducationLevel,shape=EducationLevel), size=0.7) + 
+  geom_pointrange(aes (color = EducationLevel,shape=EducationLevel), size=1) + 
   geom_errorbar(aes (color = EducationLevel), width=0.5) + 
   geom_hline(yintercept=mean(predicted_grassonly_results$Estimate), linetype="dashed", color = "black") +
   ylim(-2, 15) +
   scale_color_manual(values=c("orchid", "skyblue4", "darkgoldenrod2"))+
   facet_nested(~ RaceEthnicity + EducationLevel, nest_line = TRUE) + 
   theme_bw()+ # sets white background with gray grid marks
-  theme(legend.position = "none", axis.text.x = element_text(size = 10, angle = 45, vjust = 1.1, hjust=1),
+  theme(legend.position = "none", 
+        axis.text.x = element_text(face = "bold", size = 11, angle = 45, vjust = 1.1, hjust=1.2),
+        axis.text.y = element_text(face = "bold", size = 18),
+        strip.text.x = element_text(face = "bold", size = 11),
         strip.background = element_rect(colour = "black", linewidth = 1) ,
         plot.title = element_text(face = "bold"), 
-        axis.title.y = element_text(face = "bold", angle = 0, vjust = 0.5),
-        axis.title.x = element_text(face = "bold")) + 
+        axis.title.y = element_text(face = "bold", angle = 0, vjust = 0.5, size = 18),
+        axis.title.x = element_text(face = "bold", size = 18)) + 
   labs(x = "Neighborhood SES", y = "%\n Predicted\n Grass") 
 
 grassonly 

@@ -117,6 +117,9 @@ mesa_gsv <- mesa_gsv %>%
 xtabs( ~ educ_3cat + educ1, mesa_gsv, addNA = TRUE, na.action = NULL) # looks good
 xtabs( ~ income_4cat + income1, mesa_gsv, addNA = TRUE, na.action = NULL) # looks good
 
+df %>% 
+  mutate(mean_price_bins = cut_number(mean_price, 5))
+
 mesa_gsv <- mesa_gsv %>% 
   mutate(ndepr_terts = ntile(F1_PC2, 3)) %>% # higher F1_PC2 value denotes worse NSES
   mutate(
@@ -129,6 +132,14 @@ mesa_gsv <- mesa_gsv %>%
   mutate(ndepr_reord = as.factor(ndepr_reord)) %>% 
   mutate(ndepr_terts_fact = if_else(ndepr_reord == 3, 'High NSES', if_else(ndepr_terts == 2, 'Mod NSES', 'Low NSES'))) %>% 
   mutate(ndepr_terts_fact=as.factor(ndepr_terts_fact))
+
+# do a check that the ndepr levels are what I think/have assigned them to be
+## i.e. that low SES are highest tertile of F1_PC2 values, high SES are the lowest
+## use cut_number to see what the actual tertile cutpoints are
+mesa_gsv %>% 
+  mutate(ndepr_terts_bins = cut_number(F1_PC2,3)) %>% 
+  dplyr::select(idno, F1_PC2, ndepr_terts, ndepr_reord, ndepr_terts_fact, ndepr_terts_bins)
+# yep - these all check out
 
 mesa_gsv <- mesa_gsv %>% 
   mutate(
@@ -218,7 +229,8 @@ race_edu_depr_strata %>%
 # compare the new strata with the flipped depr var to the old
 race_edu_depr_strata %>% 
   dplyr::select(strata, race1c, educ_3cat, ndepr_terts, ndepr_reord, ndepr_terts_fact, F1_PC2) %>% 
-  head(., 20)
+  head(., 100) %>% 
+  print(n=100)
 
 strata_new_table <- table(race_edu_depr_strata$ndepr_reord,race_edu_depr_strata$strata) # check the recode
 strata_new_table
@@ -418,8 +430,7 @@ any(model1_race_edu_f1_green_other.rhats > 1.1) # convergence good
 any(model1_race_edu_f1_green_other.rhats > 1.05) # convergence good
 
 ### 2b.i: % total greenness, interactional model -----------------------------------------
-
-model2_race_edu_f1_greentotal <- brm(green_total~1+race1c+educ_3cat+ndepr_reord+age1c+gender1+income1+site1c+(1|strata),
+model2_race_edu_f1_greentotal <- brm(green_total~1+relevel(race1c,ref="3")+educ_3cat+ndepr_reord+age1c+gender1+income1+site1c+(1|strata),
                                      data = race_edu_depr_strata,
                                      warmup = 5000,
                                      iter = 10000,
@@ -429,7 +440,7 @@ model2_race_edu_f1_greentotal
 
 ### 2b.ii: % trees only, interactional model -----------------------------------------
 
-model2_race_edu_f1_trees <- brm(tree_total~1+race1c+educ_3cat+ndepr_reord+age1c+gender1+income1+site1c+(1|strata),
+model2_race_edu_f1_trees <- brm(tree_total~1+relevel(race1c,ref="3")+educ_3cat+ndepr_reord+age1c+gender1+income1+site1c+(1|strata),
                                 data = race_edu_depr_strata,
                                 warmup = 5000,
                                 iter = 10000,
@@ -439,7 +450,7 @@ model2_race_edu_f1_trees
 
 ### 2b.iii: % grass only, interactional model -----------------------------------------
 
-model2_race_edu_f1_grass <- brm(grass~1+race1c+educ_3cat+ndepr_reord+age1c+gender1+income1+site1c+(1|strata),
+model2_race_edu_f1_grass <- brm(grass~1+relevel(race1c,ref="3")+educ_3cat+ndepr_reord+age1c+gender1+income1+site1c+(1|strata),
                                      data = race_edu_depr_strata,
                                      warmup = 5000,
                                      iter = 10000,
@@ -449,7 +460,7 @@ model2_race_edu_f1_grass
 
 ### 2b.iv: % other greenness, interactional model -----------------------------------------
 
-model2_race_edu_f1_green_other <- brm(green_other~1+race1c+educ_3cat+ndepr_reord+age1c+gender1+income1+site1c+(1|strata),
+model2_race_edu_f1_green_other <- brm(green_other~1+relevel(race1c,ref="3")+educ_3cat+ndepr_reord+age1c+gender1+income1+site1c+(1|strata),
                                 data = race_edu_depr_strata,
                                 warmup = 5000,
                                 iter = 10000,
@@ -459,6 +470,10 @@ model2_race_edu_f1_green_other
 
 # step 3: RQ 1: How useful are intersectional strata for predicting baseline greenspace? -----------------------------------------
 #   --> Calculate the VPC (in %)
+# round(strata.var.model1/(strata.var.model1 + residual.var.model1) * 100, 2)
+# strata.var.model1 = model 1 (sd intercept estimat)^2
+# residual.var.model1 = model 1 (fam specific params sigma)^2
+# see Keller et al. 2023 for ref
 ### 3a. % total green space  -----------------------------------------
 # Check results
 model1_race_edu_f1_greentotal
@@ -475,37 +490,37 @@ round(12.96/ (12.96 + 59.7529)*100,2) # 17.82%
 model1_race_edu_f1_trees
 
 # Variance at race x edu strata strata level model 1 (sd intercept estimate)^2
-2.07 ^2 # 4.2849
+2.73 ^2 # 7.4529
 
 # Variance at individual level model 1 (fam specific params sigma)^2
-6.57^2 # 43.1649
+6.17^2 # 38.0689
 
 # Calculate VPC model 1
-round(4.2849/ (4.2849 + 43.1649)*100,2) # 9.03%
+round(7.4529/ (7.4529 + 38.0689)*100,2) # 16.37%
 
 ### 3c. % grass only  -----------------------------------------
 # Check results
 model1_race_edu_f1_grass
 # Variance at race x edu strata strata level model 1 (sd intercept estimate)^2
-0.81 ^2 # 0.6561
+0.86 ^2 # 0.7396
 
 # Variance at individual level model 1 (fam specific params sigma)^2
-2.68^2 # 7.1824
+2.43^2 # 5.9049
 
 # Calculate VPC model 1
-round(0.6561/ (0.6561 + 7.1824)*100,2) # 8.37%
+round(0.7396/ (0.7396 + 5.9049)*100,2) # 11.13%
 
 ### 3d. % other greenness  -----------------------------------------
 model1_race_edu_f1_green_other
 
 # Variance at race x edu strata strata level model 1 (sd intercept estimate)^2
-0.22 ^2 # 0.0484
+0.21 ^2 # 0.0441
 
 # Variance at individual level model 1 (fam specific params sigma)^2
-0.75^2 # 0.5625
+0.58^2 # 0.3364
 
 # Calculate VPC model 1
-round(0.0484/ (0.0484 + 0.5625)*100,2) # 7.92%
+round(0.0441/ (0.0441 + 0.3364)*100,2) # 11.59%
 
 # step 4: RQ 2: How does the predicted greenspace outcome differ across intersectional strata? -----------------------------------------
 # --> Calculate the average baseline greenspace outcome (and 95% CI) predicted by the simple intersectional model for each stratum
@@ -554,82 +569,102 @@ pred.means.model1_race_edu_f1_green_other <- model1_race_edu_f1_green_other %>%
   mean_qi(.epred) # 
 View(pred.means.model1_race_edu_f1_green_other)
 
+#### --> for forest plots of null/random effects model PROCEED TO "MAIHDA forest plots.R"
 
-#### 08/03/24: BELOW PORTIONS ARE NOT CURRENTLY INCLUDED IN EJ MANU SO NO UPDATES HAVE BEEN MADE TO THIS SECTION
-#### --> INSTEAD PROCEED TO MAIHDA forest plots.R
 # step 5: RQ 3: To what extent do interx of social categories contribute incrementally to explaining greenspace inequalities? ---------------
 # --> Calculate the VPC (in %) in the interactional model (VPC adjusted)
-
+# round(strata.var.model2/(strata.var.model2 + residual.var.model2) * 100, 2)
+# strata.var.model1 = model 2 (sd intercept estimat)^2
+# residual.var.model1 = model 2 (fam specific params sigma)^2
+# see Keller et al. 2023 for ref
 ## race x edu x neighborhood dep ####
 ### total greenspace ####
 model2_race_edu_f1_greentotal
-# Variance at race x edu strata strata level model 2 (sd intercept estimate)^2
-1.94^2 # 3.7636
+# Variance at strata strata level model 2 (sd intercept estimate)^2
+2.25^2 # 5.1076
 
 # Variance at individual level model 2 (fam specific params sigma)^2
-8.17^2 # 66.7489
+7.73^2 # 59.7529
 
 # Calculate adjusted VPC model 2
-round(3.7636 / (3.7636 + 66.7489)*100,2) # 5.34%
+round(5.1076 / (5.1076 + 59.7529)*100,2) # 7.87%
 
+# get strata level variance from model 1 (null model)
+model1_race_edu_f1_greentotal
+# Variance at strata strata level model 1 (sd intercept estimate)^2
+3.60^2 # 12.96
 # Proportional Change in Variance (PCV) = Assessment of the extent to which between-stratum 
 # inequalities are explained by additive vs. interactive/residual effects
 # i.e. percentage of between-strata variance that cannot be explained by main effects (in %):
-# (Variance at individual level model 2 - Variance at strata strata level model 2)/Variance at individual level model 2 
-round(((70.8964-3.7249)/70.8964)*100,2) # 94.75
-100 - round(((70.8964-3.7249)/70.8964)*100,2) # 5.25
+# WRONG ---_> (Variance at individual level model 2 - Variance at strata strata level model 2)/Variance at individual level model 2 
+# CORRECT --> pcv <− round(((strata.var.model1 - strata.var.model2) / strata.var.model1) * 100, 2)
+# strata.var.model1 = model 1 sd(Intercept)^2
+# strata.var.model2 = model 2 sd(Intercept)^2
+# see Keller et al 2023 Table 2 - p 31
+round(((12.96-5.1076)/12.96)*100,2) # PCV = 60.59%
+100 - round(((12.96-5.1076)/12.96)*100,2) # 39.41%
 
 ### trees ####
 model2_race_edu_f1_trees
-# Variance at race x edu strata strata level model 2 (sd intercept estimate)^2
-1.09^2 # 1.1881
+# Variance at strata level model 2 (sd intercept estimate)^2
+1.42^2 # 2.0164
 
 # Variance at individual level model 2 (fam specific params sigma)^2
-6.78 ^2 # 45.9684
+6.17^2 # 38.0689
 
 # Calculate adjusted VPC model 2
-round(1.1881 / (1.1881 + 45.9684)*100,2) # 2.52%
+round(2.0164 / (2.0164 + 38.0689)*100,2) # 5.03%
 
+# get strata level variance from null model 1
+model1_race_edu_f1_trees 
+2.73^2 # 7.4529
 # Proportional Change in Variance (PCV) = Assessment of the extent to which between-stratum 
 # inequalities are explained by additive vs. interactive/residual effects
 # i.e. percentage of between-strata variance that cannot be explained by main effects (in %):
-round(((45.9684-1.1881)/45.9684)*100,2) # 97.46
-100 - round(((45.9684-1.1881)/45.9684)*100,2) # 2.58
+round(((7.4529-2.0164)/7.4529)*100,2) # 72.94
+100 - round(((7.4529-2.0164)/7.4529)*100,2) # 27.06
 
 ### grass ####
 model2_race_edu_f1_grass
 # Variance at race x edu strata strata level model 2 (sd intercept estimate)^2
-0.76^2 # 0.5776
+0.77^2 # 0.5929
 
 # Variance at individual level model 2 (fam specific params sigma)^2
-2.79^2 # 7.7841
+2.43^2 # 5.9049
 
 # Calculate adjusted VPC model 2
-round(0.5776 / (0.5776 + 7.7841)*100,2) # 5.04%
+round(0.5929 / (0.5929 + 5.9049)*100,2) # 9.12%
+
+# get null model strata variance
+model1_race_edu_f1_grass
+0.86^2 # 0.7396
 
 # Proportional Change in Variance (PCV) = Assessment of the extent to which between-stratum 
 # inequalities are explained by additive vs. interactive/residual effects
 # i.e. percentage of between-strata variance that cannot be explained by main effects (in %):
 # (Variance at individual level model 2 - Variance at strata strata level model 2)/Variance at individual level model 2 
-round(((7.7841-0.5776)/7.7841)*100,2) # 92.58
-100 - round(((7.7841-0.5776)/7.7841)*100,2) # 7.42
+round(((0.7396-0.5929)/0.7396)*100,2) # 19.84
+100 - round(((0.7396-0.5929)/0.7396)*100,2) # 80.16
 
 ### other green ####
 model2_race_edu_f1_green_other
 # Variance at race x edu strata strata level model 2 (sd intercept estimate)^2
-0.12^2 # 0.0144
+0.11^2 # 0.0121
 
 # Variance at individual level model 2 (fam specific params sigma)^2
-0.77 ^2 # 0.5929
+0.58 ^2 # 0.3364
 
 # Calculate adjusted VPC model 2
-round(0.0144 / (0.0144 + 0.5929)*100,2) # 2.37%
+round(0.0121 / (0.0121 + 0.3364)*100,2) # 3.47%
 
+# get strata variance from null model 1
+model1_race_edu_f1_green_other
+0.21^2  # 0.0441
 # Proportional Change in Variance (PCV) = Assessment of the extent to which between-stratum 
 # inequalities are explained by additive vs. interactive/residual effects
 # i.e. percentage of between-strata variance that cannot be explained by main effects (in %):
-round(((0.5929-0.0144)/0.5929)*100,2) # 97.57
-100 - round(((0.5929-0.0144)/0.5929)*100,2) # 2.43
+round(((0.0441-0.0121)/0.0441)*100,2) # 72.56%
+100 - round(((0.0441-0.0121)/0.0441)*100,2) # 27.44%
 
 # step 6: RQ 4: Are greenspace inequalities more or less pronounced in specific intersectional strata? ---------------
 ## for race x edu strata SKIP THIS FOR NOW SINCE PROCEEDING WITH race/edu/f1_pc strata
@@ -658,7 +693,6 @@ bayes.random.effects_trees_new <- round(bayes.random.effects_trees_new, 3)
 bayes.random.effects_grass_new <- round(bayes.random.effects_grass_new, 3) 
 bayes.random.effects_green_other_new <- round(bayes.random.effects_green_other_new, 3)
 
-
 # Add strata number
 #bayes.random.effects.new$strata <- 1:36
 bayes.random.effects_green_new$strata <- 1:36
@@ -666,7 +700,8 @@ bayes.random.effects_trees_new$strata <- 1:36
 bayes.random.effects_grass_new$strata <- 1:36
 bayes.random.effects_green_other_new$strata <- 1:36
 
-# Change order of variables
+
+# Change order of variables to put strata # first
 #bayes.random.effects.new <- bayes.random.effects.new[,c(5,1,2,3,4)]
 bayes.random.effects_green_new <- bayes.random.effects_green_new[,c(5,1,2,3,4)]
 bayes.random.effects_trees_new <- bayes.random.effects_trees_new[,c(5,1,2,3,4)]
@@ -714,4 +749,210 @@ WriteXLS(bayes.random.effects_green_other_new, ExcelFileName = "bayes.random.eff
          FreezeRow = 0, FreezeCol = 0,
          envir = parent.frame())
 
+# step 7: stratified analyses ---------
+glimpse(race_edu_depr_strata) # 5,858
+# already have pop density dichotomoized pop density var
+
+## 7.0. split main dataset into high vs low pop density ---------
+# create 2 subsets: popden_dichot == 0 and popden_dichot ==1
+race_edu_depr_strata %>% 
+  ungroup() %>% 
+  count(popden_dichot)
+
+race_edu_depr_strata_lowdens <-race_edu_depr_strata %>%
+  filter(popden_dichot==0)
+dim(race_edu_depr_strata_lowdens) # 2724
+glimpse(race_edu_depr_strata_lowdens)
+range(race_edu_depr_strata_lowdens$strata)
+
+race_edu_depr_strata_highdens <-race_edu_depr_strata %>% 
+  filter(popden_dichot==1)
+dim(race_edu_depr_strata_highdens) # 3134
+glimpse(race_edu_depr_strata_highdens)
+range(race_edu_depr_strata_highdens$strata)
+2724+3134 # 5858 - yep
+
+## 7.1a. create intersectional strata for each dataset -------
+# low pop dens dataset
+#race_edu_depr_low_new_strata <- race_edu_depr_strata_lowdens %>%
+#  dplyr::group_by(race1c,educ_3cat,ndepr_reord) %>%  # by race/eth, edu & NSES
+#  dplyr::mutate(strata_popdens=cur_group_id())               # 4 x 3 x 3 = 36 strata 
+#head(race_edu_depr_low_new_strata,50)
+#range(race_edu_depr_low_new_strata$strata_popdens) # 1-36 as expected for race/eth x edu strata
+
+race_edu_depr_low_new_strata %>% 
+  dplyr::select(strata_popdens, race1c, educ_3cat, ndepr_reord, F1_PC2) %>% 
+  head(., 20)
+
+strata_new_table_low <- table(race_edu_depr_low_new_strata$ndepr_reord,race_edu_depr_low_new_strata$strata_popdens) # check the recode
+strata_new_table_low
+
+# high pop dataset
+race_edu_depr_high_new_strata <- race_edu_depr_strata_highdens %>%
+  dplyr::group_by(race1c,educ_3cat,ndepr_reord) %>%  # by race/eth, edu & NSES
+  dplyr::mutate(strata_popdens=cur_group_id())               # 4 x 3 x 3 = 36 strata 
+head(race_edu_depr_high_new_strata,50)
+range(race_edu_depr_high_new_strata$strata_popdens)
+
+race_edu_depr_high_new_strata %>% 
+  dplyr::select(strata_popdens, race1c, educ_3cat, ndepr_reord, F1_PC2) %>% 
+  head(., 20)
+
+strata_new_table_high <- table(race_edu_depr_high_new_strata$ndepr_reord,race_edu_depr_high_new_strata$strata_popdens) # check the recode
+strata_new_table_high
+
+## 7.1b. check counts of intersectional strata for each dataset -------
+total.number.strata <- 36 # num strata we have for race x edu x f1
+n.strata_low <- table(race_edu_depr_low_new_strata$strata_popdens) # store sample sizes of strata in an object
+n.strata_low # lowest is 4
+n.strata.df_low <- as.data.frame(t(n.strata_low)) # convert to df
+n.strata.df_low
+n.strata.30_low <- sum(n.strata.df_low$Freq>=30) #num strata with more than 30 individs
+n.strata.30_low
+n.strata.30_low/total.number.strata* 100 # 72% of strata have >30 individs
+
+n.strata.20_low <- sum(n.strata.df_low$Freq>=20) #num strata with more than 30 individs
+n.strata.20_low
+n.strata.20_low/total.number.strata* 100 # 80.6% of strata have >20 individs
+
+n.strata.10_low <- sum(n.strata.df_low$Freq>=10) #num strata with more than 10 individs
+n.strata.10_low
+n.strata.10_low/total.number.strata* 100 
+
+n.strata.5_low <- sum(n.strata.df_low$Freq>=5) #num strata with more than 5 individs
+n.strata.5_low
+n.strata.5_low/total.number.strata* 100 # 97.2 (35 out of 36)
+
+n.strata_high <- table(race_edu_depr_high_new_strata$strata_popdens) # store sample sizes of strata in an object
+n.strata_high # lowest is 14
+n.strata.df_high <- as.data.frame(t(n.strata_high)) # convert to df
+n.strata.df_high
+n.strata.30_high <- sum(n.strata.df_high$Freq>=30) #num strata with more than 30 individs
+n.strata.30_high
+n.strata.30_high/total.number.strata* 100 # 78% of strata have >30 individs
+
+n.strata.20_high <- sum(n.strata.df_high$Freq>=20) #num strata with more than 30 individs
+n.strata.20_high
+n.strata.20_high/total.number.strata* 100 # 97.2% of strata have >20 individs
+
+n.strata.10_high <- sum(n.strata.df_high$Freq>=10) #num strata with more than 10 individs
+n.strata.10_high
+n.strata.10_high/total.number.strata* 100 
+
+n.strata.5_low <- sum(n.strata.df_low$Freq>=5) #num strata with more than 5 individs
+n.strata.5_low
+n.strata.5_low/total.number.strata* 100 # 100% 
+
+## 7.2a.ii: % trees only, Simple intersectional  -----------------------------------------
+glimpse(race_edu_depr_strata_lowdens)
+model1_race_edu_f1_trees_low <- brm(tree_total~1+age1c+gender1+income1+site1c+(1|strata),
+                                data = race_edu_depr_strata_lowdens,
+                                warmup = 5000,
+                                iter = 10000,
+                                chains=3, seed=123)
+
+model1_race_edu_f1_trees_low
+
+model1_race_edu_f1_trees_high <- brm(tree_total~1+age1c+gender1+income1+site1c+(1|strata),
+                                    data = race_edu_depr_strata_highdens,
+                                    warmup = 5000,
+                                    iter = 10000,
+                                    chains=3, seed=123)
+
+model1_race_edu_f1_trees_high
+
+
+
+## 7.2a.iii:  % grass only, Simple intersectional  -----------------------------------------
+model1_race_edu_f1_grass_low <- brm(grass~1+age1c+gender1+income1+site1c+(1|strata),
+                                data = race_edu_depr_strata_lowdens,
+                                warmup = 5000,
+                                iter = 10000,
+                                chains=3, seed=123)
+
+model1_race_edu_f1_grass_low
+
+model1_race_edu_f1_grass_high <- brm(grass~1+age1c+gender1+income1+site1c+(1|strata),
+                                    data = race_edu_depr_strata_highdens,
+                                    warmup = 5000,
+                                    iter = 10000,
+                                    chains=3, seed=123)
+
+model1_race_edu_f1_grass_high
+
+
+## 7.3 calc VPCs -----------------------------------------
+# --> Calculate the average baseline greenspace outcome (and 95% CI) predicted by the simple intersectional model for each stratum
+# trees - low
+model1_race_edu_f1_trees_low
+# Variance at race x edu x depr strata strata level model 1 (sd intercept estimate)^2
+2.52 ^2 # 6.3504
+
+# Variance at individual level model 1 (fam specific params sigma)^2
+5.93^2 # 35.1649
+
+# Calculate VPC model 1
+round(6.3504/ (6.3504 + 35.1649)*100,2) # 15.3%
+
+# trees - high
+model1_race_edu_f1_trees_high
+# Variance at race x edu x depr strata strata level model 1 (sd intercept estimate)^2
+2.29 ^2 # 5.2441
+
+# Variance at individual level model 1 (fam specific params sigma)^2
+5.58^2 # 31.1364
+
+# Calculate VPC model 1
+round(5.2441/ (5.2441 + 31.1364)*100,2) # 14.41%
+
+# grass - low
+model1_race_edu_f1_grass_low
+# Variance at race x edu x depr strata strata level model 1 (sd intercept estimate)^2
+0.72 ^2 # 0.5184
+
+# Variance at individual level model 1 (fam specific params sigma)^2
+2.78^2 # 7.7284
+
+# Calculate VPC model 1
+round(0.5184/ (0.5184 + 7.7284)*100,2) # 6.29%
+
+# grass - high
+model1_race_edu_f1_grass_high
+# Variance at race x edu x depr strata strata level model 1 (sd intercept estimate)^2
+0.72^2 # 0.5184
+
+# Variance at individual level model 1 (fam specific params sigma)^2
+1.58^2 # 2.4964
+
+# Calculate VPC model 1
+round(0.5184/ (0.5184 + 2.4964)*100,2) # 17.2%
+
+
+## 7.4 Predicted average greenspace per strata ------
+### 7.4a. % trees only -------
+# model 1 (simple/null)
+pred.means.model1_race_edu_f1_trees_low <- model1_race_edu_f1_trees_low %>% 
+  epred_draws(race_edu_depr_strata_lowdens) %>% 
+  group_by(strata) %>% 
+  mean_qi(.epred) # 
+View(pred.means.model1_race_edu_f1_trees_low)
+
+pred.means.model1_race_edu_f1_trees_high <- model1_race_edu_f1_trees_high %>% 
+  epred_draws(race_edu_depr_strata_highdens) %>% 
+  group_by(strata) %>% 
+  mean_qi(.epred) # 
+View(pred.means.model1_race_edu_f1_trees_high)
+
+### 7.4a. % grass only -------
+pred.means.model1_race_edu_f1_grass_low <- model1_race_edu_f1_grass_low %>% 
+  epred_draws(race_edu_depr_strata_lowdens) %>% 
+  group_by(strata) %>% 
+  mean_qi(.epred) # 
+View(pred.means.model1_race_edu_f1_grass_low)
+
+pred.means.model1_race_edu_f1_grass_high <- model1_race_edu_f1_grass_high %>% 
+  epred_draws(race_edu_depr_strata_highdens) %>% 
+  group_by(strata) %>% 
+  mean_qi(.epred) # 
+View(pred.means.model1_race_edu_f1_grass_high)
 
