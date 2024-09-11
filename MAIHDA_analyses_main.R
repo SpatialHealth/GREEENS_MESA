@@ -11,6 +11,8 @@ library(WriteXLS)
 library(rcompanion)
 library(extraDistr)
 library(haven)
+library(broom)
+library(broom.mixed)
 
 
 ##### Setup/run MAIHDA models to assess relationship and interaction
@@ -208,11 +210,18 @@ mesa_gsv_noNArace_edu_depr <- mesa_gsv %>%
   filter(!is.na(green_total)) %>%  # ... non-missing outcomes
   filter(!is.na(income1)) # non-missing income
 dim(mesa_gsv_noNArace_edu_depr) # 5858 (exam 4 only N was 5246)
+glimpse(mesa_gsv_noNArace_edu_depr)
+
 
 ## check covar missingness------
 glimpse(mesa_gsv_noNArace_edu_depr)
 mesa_gsv_noNArace_edu_depr %>% 
   summarise_all(~ sum(is.na(.))) # only complete-case
+
+out_dir <- "/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/data/"
+readr::write_csv(x = mesa_gsv_noNArace_edu_depr, 
+                 file = paste0(out_dir, "mesa_gsv_noNArace_edu_depr.csv"), 
+                 num_threads = 3) 
 
 # step 1 intersectional strata & size checks #################
 ### 1a. create intersectional strata ######################################
@@ -760,50 +769,52 @@ race_edu_depr_strata %>%
   count(popden_dichot)
 
 race_edu_depr_strata_lowdens <-race_edu_depr_strata %>%
+  ungroup() %>%
+  dplyr::select(-strata) %>% 
   filter(popden_dichot==0)
 dim(race_edu_depr_strata_lowdens) # 2724
 glimpse(race_edu_depr_strata_lowdens)
-range(race_edu_depr_strata_lowdens$strata)
 
 race_edu_depr_strata_highdens <-race_edu_depr_strata %>% 
+  ungroup() %>%
+  dplyr::select(-strata) %>%
   filter(popden_dichot==1)
 dim(race_edu_depr_strata_highdens) # 3134
 glimpse(race_edu_depr_strata_highdens)
-range(race_edu_depr_strata_highdens$strata)
 2724+3134 # 5858 - yep
 
 ## 7.1a. create intersectional strata for each dataset -------
 # low pop dens dataset
-#race_edu_depr_low_new_strata <- race_edu_depr_strata_lowdens %>%
-#  dplyr::group_by(race1c,educ_3cat,ndepr_reord) %>%  # by race/eth, edu & NSES
-#  dplyr::mutate(strata_popdens=cur_group_id())               # 4 x 3 x 3 = 36 strata 
-#head(race_edu_depr_low_new_strata,50)
-#range(race_edu_depr_low_new_strata$strata_popdens) # 1-36 as expected for race/eth x edu strata
+race_edu_depr_low_new_strata <- race_edu_depr_strata_lowdens %>%
+  dplyr::group_by(race1c,educ_3cat,ndepr_reord) %>%  # by race/eth, edu & NSES
+  dplyr::mutate(strata=cur_group_id())               # 4 x 3 x 3 = 36 strata 
+head(race_edu_depr_low_new_strata,50)
+range(race_edu_depr_low_new_strata$strata) # 1-36 as expected for race/eth x edu strata
 
 race_edu_depr_low_new_strata %>% 
-  dplyr::select(strata_popdens, race1c, educ_3cat, ndepr_reord, F1_PC2) %>% 
+  dplyr::select(strata, race1c, educ_3cat, ndepr_reord, F1_PC2) %>% 
   head(., 20)
 
-strata_new_table_low <- table(race_edu_depr_low_new_strata$ndepr_reord,race_edu_depr_low_new_strata$strata_popdens) # check the recode
+strata_new_table_low <- table(race_edu_depr_low_new_strata$ndepr_reord,race_edu_depr_low_new_strata$strata) # check the recode
 strata_new_table_low
 
 # high pop dataset
 race_edu_depr_high_new_strata <- race_edu_depr_strata_highdens %>%
   dplyr::group_by(race1c,educ_3cat,ndepr_reord) %>%  # by race/eth, edu & NSES
-  dplyr::mutate(strata_popdens=cur_group_id())               # 4 x 3 x 3 = 36 strata 
+  dplyr::mutate(strata=cur_group_id())               # 4 x 3 x 3 = 36 strata 
 head(race_edu_depr_high_new_strata,50)
-range(race_edu_depr_high_new_strata$strata_popdens)
+range(race_edu_depr_high_new_strata$strata)
 
 race_edu_depr_high_new_strata %>% 
-  dplyr::select(strata_popdens, race1c, educ_3cat, ndepr_reord, F1_PC2) %>% 
+  dplyr::select(strata, race1c, educ_3cat, ndepr_reord, F1_PC2) %>% 
   head(., 20)
 
-strata_new_table_high <- table(race_edu_depr_high_new_strata$ndepr_reord,race_edu_depr_high_new_strata$strata_popdens) # check the recode
+strata_new_table_high <- table(race_edu_depr_high_new_strata$ndepr_reord,race_edu_depr_high_new_strata$strata) # check the recode
 strata_new_table_high
 
 ## 7.1b. check counts of intersectional strata for each dataset -------
 total.number.strata <- 36 # num strata we have for race x edu x f1
-n.strata_low <- table(race_edu_depr_low_new_strata$strata_popdens) # store sample sizes of strata in an object
+n.strata_low <- table(race_edu_depr_low_new_strata$strata) # store sample sizes of strata in an object
 n.strata_low # lowest is 4
 n.strata.df_low <- as.data.frame(t(n.strata_low)) # convert to df
 n.strata.df_low
@@ -823,7 +834,7 @@ n.strata.5_low <- sum(n.strata.df_low$Freq>=5) #num strata with more than 5 indi
 n.strata.5_low
 n.strata.5_low/total.number.strata* 100 # 97.2 (35 out of 36)
 
-n.strata_high <- table(race_edu_depr_high_new_strata$strata_popdens) # store sample sizes of strata in an object
+n.strata_high <- table(race_edu_depr_high_new_strata$strata) # store sample sizes of strata in an object
 n.strata_high # lowest is 14
 n.strata.df_high <- as.data.frame(t(n.strata_high)) # convert to df
 n.strata.df_high
@@ -843,10 +854,19 @@ n.strata.5_low <- sum(n.strata.df_low$Freq>=5) #num strata with more than 5 indi
 n.strata.5_low
 n.strata.5_low/total.number.strata* 100 # 100% 
 
+#race_edu_depr_strata_lowdens <- race_edu_depr_strata_lowdens %>% 
+#  mutate(strata = as.factor(strata))
+#race_edu_depr_strata_highdens <- race_edu_depr_strata_highdens %>% 
+#  mutate(strata = as.factor(strata))
+
 ## 7.2a.ii: % trees only, Simple intersectional  -----------------------------------------
-glimpse(race_edu_depr_strata_lowdens)
+glimpse(race_edu_depr_low_new_strata)
+glimpse(race_edu_depr_high_new_strata)
+glimpse(race_edu_depr_strata)
+
+
 model1_race_edu_f1_trees_low <- brm(tree_total~1+age1c+gender1+income1+site1c+(1|strata),
-                                data = race_edu_depr_strata_lowdens,
+                                data = race_edu_depr_low_new_strata,
                                 warmup = 5000,
                                 iter = 10000,
                                 chains=3, seed=123)
@@ -854,7 +874,7 @@ model1_race_edu_f1_trees_low <- brm(tree_total~1+age1c+gender1+income1+site1c+(1
 model1_race_edu_f1_trees_low
 
 model1_race_edu_f1_trees_high <- brm(tree_total~1+age1c+gender1+income1+site1c+(1|strata),
-                                    data = race_edu_depr_strata_highdens,
+                                    data = race_edu_depr_high_new_strata,
                                     warmup = 5000,
                                     iter = 10000,
                                     chains=3, seed=123)
@@ -931,16 +951,68 @@ round(0.5184/ (0.5184 + 2.4964)*100,2) # 17.2%
 ## 7.4 Predicted average greenspace per strata ------
 ### 7.4a. % trees only -------
 # model 1 (simple/null)
+model1_race_edu_f1_trees_low
+#tidy_model1_trees_low <- tidy(model1_race_edu_f1_trees_low)
+#tidy(model1_race_edu_f1_trees_low)
+#tidy_model1_trees_low
+#tidy_pred <- model1_race_edu_f1_trees_low %>% 
+#  predicted_draws(newdata = race_edu_depr_strata_lowdens)
+#tidy_pred
+
+glimpse(race_edu_depr_low_new_strata)
 pred.means.model1_race_edu_f1_trees_low <- model1_race_edu_f1_trees_low %>% 
-  epred_draws(race_edu_depr_strata_lowdens) %>% 
+  epred_draws(race_edu_depr_low_new_strata) %>% 
+  group_by(strata) #%>% 
+  #mean_qi(.epred) # 
+View(pred.means.model1_race_edu_f1_trees_low)
+
+# race_edu_depr_strata_lowdens <- race_edu_depr_strata_lowdens %>% 
+#  ungroup()
+
+race_edu_depr_strata_lowdens_df <- data.frame(race_edu_depr_strata_lowdens)
+epred_draws(model1_race_edu_f1_trees_low, newdata = race_edu_depr_strata_lowdens, allow_new_levels = T) #Error
+
+pred.means.model1_race_edu_f1_trees_low <- model1_race_edu_f1_trees_low %>% 
+  epred_draws(race_edu_depr_strata_lowdens, re_formula = ~(1|strata), allow_new_levels = TRUE) %>% 
   group_by(strata) %>% 
+  mean_qi(.epred) # 
+
+pred.means.model1_race_edu_f1_trees_low <- model1_race_edu_f1_trees_low %>% 
+  tidybayes::epred_draws(race_edu_depr_strata_lowdens) %>% 
+  dplyr::group_by(strata) %>% 
   mean_qi(.epred) # 
 View(pred.means.model1_race_edu_f1_trees_low)
 
+x_low <- race_edu_depr_strata_lowdens$strata
+x_low
+y_low<-x_low[1:36] 
+y_low
+levels(y_low)
+
+x_high <- race_edu_depr_strata_highdens$strata
+x_high
+y_high<-x_high[1:36] 
+y_high
+levels(y_high)
+
+
+model1_race_edu_f1_trees_high
+glimpse(race_edu_depr_strata_highdens)
+race_edu_depr_strata_highdens <- race_edu_depr_strata_highdens %>% 
+  ungroup()
+
 pred.means.model1_race_edu_f1_trees_high <- model1_race_edu_f1_trees_high %>% 
-  epred_draws(race_edu_depr_strata_highdens) %>% 
-  group_by(strata) %>% 
-  mean_qi(.epred) # 
+  epred_draws(race_edu_depr_high_new_strata) #%>% 
+  group_by(strata) #%>% 
+  #mean_qi(.epred) # 
+epred_draws(model1_race_edu_f1_trees_high, newdata = race_edu_depr_strata_highdens, re_formula = ~(1|strata), allow_new_levels = T) #Error
+
+
+model1_race_edu_f1_trees_high
+pred.means.model1_race_edu_f1_trees_high <- model1_race_edu_f1_trees_high %>% 
+  epred_draws(race_edu_depr_strata_highdens, sample_new_levels = "old_levels") #%>% 
+  #dplyr::group_by(strata) %>% 
+  #mean_qi(.epred) # 
 View(pred.means.model1_race_edu_f1_trees_high)
 
 ### 7.4a. % grass only -------
