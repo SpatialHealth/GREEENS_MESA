@@ -4,6 +4,7 @@
 # Last Edited: 08/10/2024
 
 library(tidyverse)
+library(magrittr)
 library(brm)
 library(brms)
 library(tidybayes)
@@ -25,6 +26,10 @@ setwd("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Gr
 ### pull 2000-2006 GSV values-------
 gsv_2000_thru_2002 <- readr::read_csv(paste0("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/data/gsv_2000_thru_2002.csv"))
 glimpse(gsv_2000_thru_2002) # 22,608 --> 7536 * 3 yrs
+gsv_2000_thru_2002  %>%  
+  n_distinct(idno) # weird - it's like %>% pipe isn't working??
+n_distinct(gsv_2000_thru_2002$idno) # 7536
+
 ### check missingness
 gsv_2000_thru_2002 %>% 
   summarise_all(~ sum(is.na(.))) # missing trends high for 0, much smaller for 500, smaller for 1000
@@ -119,9 +124,6 @@ mesa_gsv <- mesa_gsv %>%
 xtabs( ~ educ_3cat + educ1, mesa_gsv, addNA = TRUE, na.action = NULL) # looks good
 xtabs( ~ income_4cat + income1, mesa_gsv, addNA = TRUE, na.action = NULL) # looks good
 
-df %>% 
-  mutate(mean_price_bins = cut_number(mean_price, 5))
-
 mesa_gsv <- mesa_gsv %>% 
   mutate(ndepr_terts = ntile(F1_PC2, 3)) %>% # higher F1_PC2 value denotes worse NSES
   mutate(
@@ -142,16 +144,6 @@ mesa_gsv %>%
   mutate(ndepr_terts_bins = cut_number(F1_PC2,3)) %>% 
   dplyr::select(idno, F1_PC2, ndepr_terts, ndepr_reord, ndepr_terts_fact, ndepr_terts_bins)
 # yep - these all check out
-
-mesa_gsv <- mesa_gsv %>% 
-  mutate(
-    n_depr = case_when(
-      ndepr_terts == 1 ~ 3,        # flipping the least-depr indicator to 3 (highest NSES)
-      ndepr_terts == 2 ~ 2,        # stays same      
-      ndepr_terts == 3 ~ 1,        # flipping most-depr indicator to 1 (lowest NSES)
-      is.na(ndepr_terts) ~ NA      # if missing, stays missing
-    )) 
-
 
 xtabs( ~ ndepr_reord + ndepr_terts, mesa_gsv, addNA = TRUE, na.action = NULL) # looks good
 xtabs( ~ ndepr_terts_fact + ndepr_terts, mesa_gsv, addNA = TRUE, na.action = NULL)
@@ -190,7 +182,7 @@ mesa_gsv <- mesa_gsv %>%
 dim(mesa_gsv) # 6187
 sum(mesa_gsv$popden_dichot ==0) # 2951
 sum(mesa_gsv$popden_dichot ==1) # 3236
-2951+3236 # all good
+2951+3236 # all good 6187
 
 ###set cat vars to factors 
 mesa_gsv$race1c <- factor(mesa_gsv$race1c)
@@ -199,11 +191,14 @@ mesa_gsv$educ_3cat <- factor(mesa_gsv$educ_3cat)
 mesa_gsv$site1c <- factor(mesa_gsv$site1c)
 mesa_gsv$income1 <- factor(mesa_gsv$income1)
 
-###subset for non-missing race x edu x f1_pc2 
+##check site counts
+mesa_gsv %>% 
+  count(site1c) # looks rational
+
+##subset for non-missing race x edu x f1_pc2 -------
 mesa_gsv %>% 
   summarise_all(~ sum(is.na(.)))
 mesa_gsv_noNArace_edu_depr <- mesa_gsv %>% 
-  dplyr::select(-n_depr) %>% 
   filter(!is.na(race1c)) %>%
   filter(!is.na(educ_3cat)) %>% # subset to non-missing edu & f1_pc2 for race/eth x edu x f1_pc2 strata...
   filter(!is.na(ndepr_terts)) %>% # NSES
@@ -211,6 +206,10 @@ mesa_gsv_noNArace_edu_depr <- mesa_gsv %>%
   filter(!is.na(income1)) # non-missing income
 dim(mesa_gsv_noNArace_edu_depr) # 5858 (exam 4 only N was 5246)
 glimpse(mesa_gsv_noNArace_edu_depr)
+
+##check site counts again 
+mesa_gsv_noNArace_edu_depr %>% 
+  count(site1c) # looks rational
 
 
 ## check covar missingness------

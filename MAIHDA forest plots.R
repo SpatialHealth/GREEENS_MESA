@@ -42,15 +42,27 @@ head(predicted_greenother_results)
 dim(predicted_greenother_results) 
 view(predicted_greenother_results)
 
-predicted_greentotal_lowdens_results <- read.csv("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/results/predictedgreentotalforplots_lowdensity_redo.csv")
-head(predicted_greentotal_lowdens_results)
-dim(predicted_greentotal_lowdens_results) 
-view(predicted_greentotal_lowdens_results) 
+# stratified results
+predicted_trees_lowdens_results <- read.csv("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/results/predictedtreesforplots_lowdensity_redo.csv")
+head(predicted_trees_lowdens_results)
+dim(predicted_trees_lowdens_results) 
+view(predicted_trees_lowdens_results) 
 
-predicted_greentotal_highdens_results <- read.csv("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/results/predictedgreentotalforplots_highdensity_redo.csv")
-head(predicted_greentotal_highdens_results)
-dim(predicted_greentotal_highdens_results) 
-view(predicted_greentotal_highdens_results) 
+predicted_trees_highdens_results <- read.csv("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/results/predictedtreesforplots_highdensity_redo.csv")
+head(predicted_trees_highdens_results)
+dim(predicted_trees_highdens_results) 
+view(predicted_trees_highdens_results) 
+
+predicted_grass_lowdens_results <- read.csv("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/results/predictedgrassforplots_lowdensity_redo.csv")
+head(predicted_grass_lowdens_results)
+dim(predicted_grass_lowdens_results) 
+view(predicted_grass_lowdens_results) 
+
+predicted_grass_highdens_results <- read.csv("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/results/predictedgrassforplots_highdensity_redo.csv")
+head(predicted_grass_highdens_results)
+dim(predicted_grass_highdens_results) 
+view(predicted_grass_highdens_results) 
+
 
 #1. Set var as factors/labels as needed  ------------------------------------------------------------------
 
@@ -136,21 +148,37 @@ predicted_greenother_results$depr_num <- factor(predicted_greenother_results$dep
                                                 labels=c("High", "Mod", "Low"))  # changing to NSES verbiage: least = high, mod = mod, most = low  
 head(predicted_greenother_results)
 
-# to save space just swap out for low & high density
-predicted_greentotal_lowdens_results$race_num <- factor(predicted_greentotal_lowdens_results$race_num, levels=c(3,2,4,1),
+# to save space just swap out for low & high density for each outcome
+predicted_trees_lowdens_results$race_num <- factor(predicted_trees_lowdens_results$race_num, levels=c(3,2,4,1),
                                               labels=c("Black", 
                                                        "Chinese American",
                                                        "Hispanic",
                                                        "White"))
 
-predicted_greentotal_lowdens_results$edu_num <- factor(predicted_greentotal_lowdens_results$edu_num, levels = c(1,2,3), 
+predicted_trees_lowdens_results$edu_num <- factor(predicted_trees_lowdens_results$edu_num, levels = c(1,2,3), 
                                                labels = c(" High School \nor less", #reference
                                                           "Some \ncollege", 
                                                           "Bachelor's \nor higher"))
 
-predicted_greentotal_lowdens_results$depr_num <- factor(predicted_greentotal_lowdens_results$depr_num, levels = c(3,2,1), 
+predicted_trees_lowdens_results$depr_num <- factor(predicted_trees_lowdens_results$depr_num, levels = c(3,2,1), 
                                                         labels=c("High", "Mod", "Low"))  # changing to NSES verbiage: least = high, mod = mod, most = low 
-head(predicted_greentotal_lowdens_results)
+head(predicted_trees_lowdens_results)
+
+
+predicted_grass_highdens_results$race_num <- factor(predicted_grass_highdens_results$race_num, levels=c(3,2,4,1),
+                                                    labels=c("Black", 
+                                                             "Chinese American",
+                                                             "Hispanic",
+                                                             "White"))
+
+predicted_grass_highdens_results$edu_num <- factor(predicted_grass_highdens_results$edu_num, levels = c(1,2,3), 
+                                                   labels = c(" High School \nor less", #reference
+                                                              "Some \ncollege", 
+                                                              "Bachelor's \nor higher"))
+
+predicted_grass_highdens_results$depr_num <- factor(predicted_grass_highdens_results$depr_num, levels = c(3,2,1), 
+                                                    labels=c("High", "Mod", "Low"))  # changing to NSES verbiage: least = high, mod = mod, most = low 
+head(predicted_grass_highdens_results)
 
 
 #2.  nested facet forest plots------------------------------------------------------------------
@@ -164,10 +192,13 @@ colnames (predicted_greentotal_results_ln) <-c("Strata", "RaceEthnicity", "Educa
 colnames (predicted_treesonly_results) <-c("Strata", "RaceEthnicity", "EducationLevel", "NSES", "Estimate", "LowerLevel", "UpperLevel")
 colnames (predicted_grassonly_results) <-c("Strata", "RaceEthnicity", "EducationLevel", "NSES", "Estimate", "LowerLevel", "UpperLevel")
 colnames (predicted_greenother_results) <-c("Strata", "RaceEthnicity", "EducationLevel", "NSES", "Estimate", "LowerLevel", "UpperLevel")
-colnames (predicted_greentotal_lowdens_results) <-c("Strata", "RaceEthnicity", "EducationLevel", "NSES", "Estimate", "LowerLevel", "UpperLevel")
-colnames (predicted_greentotal_highdens_results) <-c("Strata", "RaceEthnicity", "EducationLevel", "NSES", "Estimate", "LowerLevel", "UpperLevel")
+colnames (predicted_trees_lowdens_results) <-c("Strata", "RaceEthnicity", "EducationLevel", "NSES", "Estimate", "LowerLevel", "UpperLevel")
+colnames (predicted_trees_highdens_results) <-c("Strata", "RaceEthnicity", "EducationLevel", "NSES", "Estimate", "LowerLevel", "UpperLevel")
+colnames (predicted_grass_lowdens_results) <-c("Strata", "RaceEthnicity", "EducationLevel", "NSES", "Estimate", "LowerLevel", "UpperLevel")
+colnames (predicted_grass_highdens_results) <-c("Strata", "RaceEthnicity", "EducationLevel", "NSES", "Estimate", "LowerLevel", "UpperLevel")
 
-head(predicted_greentotal_results)
+
+head(predicted_grass_lowdens_results)
 
 #test_plot1 <- ggplot(data=predicted_greentotal_results, aes(x = Strata, y = Estimate, ymin=LowerLevel, ymax=UpperLevel))+
 #  geom_pointrange(aes (color = EducationLevel)) + geom_errorbar(aes (color = EducationLevel)) 
@@ -288,21 +319,23 @@ greenother <- ggplot(data=predicted_greenother_results, aes((reorder(x = NSES, d
 
 greenother
 
-## Figure 3 a & b green total stratified by low vs high popn density -------
-greentotal_lowdens <- ggplot(data=predicted_greentotal_lowdens_results, aes((reorder(x = NSES, desc(NSES))), y = Estimate, ymin=LowerLevel, ymax=UpperLevel))+
-  geom_pointrange(aes (color = EducationLevel, shape=EducationLevel), size=0.7) + 
+## Figure 3 a & b trees stratified by low vs high popn density -------
+trees_lowdens <- ggplot(data=predicted_trees_lowdens_results, aes((reorder(x = NSES, desc(NSES))), y = Estimate, ymin=LowerLevel, ymax=UpperLevel))+
+  geom_pointrange(aes (color = EducationLevel, shape=EducationLevel), size=1) + 
   geom_errorbar(aes (color = EducationLevel), width=0.5) + 
-  geom_hline(yintercept=mean(predicted_greentotal_lowdens_results$Estimate), linetype="dashed", color = "black") +
+  geom_hline(yintercept=mean(predicted_trees_lowdens_results$Estimate), linetype="dashed", color = "black") +
   scale_color_manual(values=c("orchid", "skyblue4", "darkgoldenrod2"))+
   facet_nested(~ RaceEthnicity + EducationLevel, nest_line = TRUE) + 
-  ylim(0, 50) +
+  ylim(0, 35) +
   theme_bw()+ # sets white background with gray grid marks
-  theme(legend.position = "none", axis.text.x = element_text(size = 10, angle = 45, vjust = 1.1, hjust=1),
-        strip.background = element_rect(colour = "black", linewidth = 1) , # creates rectangle around nested var labels
-        plot.title = element_text(face = "bold"), 
-        axis.title.y = element_text(face = "bold", angle = 0, vjust = 0.5),
-        axis.title.x = element_text(face = "bold")) + # creates rectangle around nested var labels
-  labs(x = "Neighborhood SES", y = "%\n Predicted\n Total\n Greenness") 
+  theme(legend.position = "none", 
+        axis.text.x = element_text(face = "bold", size = 11, angle = 45, vjust = 1.1, hjust=1.2),
+        axis.text.y = element_text(face = "bold", size = 18),
+        strip.text.x = element_text(face = "bold", size = 11),
+        strip.background = element_rect(colour = "black", linewidth = 1) , 
+        axis.title.y = element_text(face = "bold", angle = 0, vjust = 0.5, size = 18),
+        axis.title.x = element_text(face = "bold", size = 18)) + 
+  labs(x = "Neighborhood SES", y = "%\n Predicted\n Trees") 
   #labs(title="A. Low Population Density (N=2,873)",
   #  x = "Neighborhood SES", y = "% Predicted Total Greenness") 
   #theme(plot.title = ggtext::element_markdown())
@@ -310,27 +343,78 @@ greentotal_lowdens <- ggplot(data=predicted_greentotal_lowdens_results, aes((reo
   #(<7,500 people per square mile) with 95% CIs across intersectional strata in the simple intersectional model.",
   #     x = "Neighborhood Deprivation", y = "% Total Street View Greenness")  
                    
-greentotal_lowdens 
+trees_lowdens 
 
-greentotal_highdens <- ggplot(data=predicted_greentotal_highdens_results, aes((reorder(x = NSES, desc(NSES))), y = Estimate, ymin=LowerLevel, ymax=UpperLevel))+
-  geom_pointrange(aes (color = EducationLevel, shape=EducationLevel), size=0.7) + 
+trees_highdens <- ggplot(data=predicted_trees_highdens_results, aes((reorder(x = NSES, desc(NSES))), y = Estimate, ymin=LowerLevel, ymax=UpperLevel))+
+  geom_pointrange(aes (color = EducationLevel, shape=EducationLevel), size=1) + 
   geom_errorbar(aes (color = EducationLevel), width=0.5) + 
-  geom_hline(yintercept=mean(predicted_greentotal_highdens_results$Estimate), linetype="dashed", color = "black") +
+  geom_hline(yintercept=mean(predicted_trees_highdens_results$Estimate), linetype="dashed", color = "black") +
   scale_color_manual(values=c("orchid", "skyblue4", "darkgoldenrod2"))+
   facet_nested(~ RaceEthnicity + EducationLevel, nest_line = TRUE) + 
-  ylim(0, 50) +
+  ylim(0, 35) +
   theme_bw()+ # sets white background with gray grid marks
-  theme(legend.position = "none", axis.text.x = element_text(size = 10, angle = 45, vjust = 1.1, hjust=1),
-        strip.background = element_rect(colour = "black", linewidth = 1) , # creates rectangle around nested var labels
-        plot.title = element_text(face = "bold"), 
-        axis.title.y = element_text(face = "bold", angle = 0, vjust = 0.5),
-        axis.title.x = element_text(face = "bold")) + # creates rectangle around nested var labels
-  labs(x = "Neighborhood SES", y = "%\n Predicted\n Total\n Greenness") 
+  theme(legend.position = "none", 
+        axis.text.x = element_text(face = "bold", size = 11, angle = 45, vjust = 1.1, hjust=1.2),
+        axis.text.y = element_text(face = "bold", size = 18),
+        strip.text.x = element_text(face = "bold", size = 11),
+        strip.background = element_rect(colour = "black", linewidth = 1) , 
+        axis.title.y = element_text(face = "bold", angle = 0, vjust = 0.5, size = 18),
+        axis.title.x = element_text(face = "bold", size = 18)) + 
+  labs(x = "Neighborhood SES", y = "%\n Predicted\n Trees") 
   #labs(title = "Figure 3b. Predicted mean percent street-view of measures of greenness for those in **high population** density area \n
   #(>7,500 people per square mile) with 95% CIs across intersectional strata in the simple intersectional model.", 
   #     x = "Neighborhood Deprivation", y = "% Total Street View Greenness") 
 
-greentotal_highdens 
+trees_highdens 
+
+## Figure 4 a & b grass stratified by low vs high popn density -------
+grass_lowdens <- ggplot(data=predicted_grass_lowdens_results, aes((reorder(x = NSES, desc(NSES))), y = Estimate, ymin=LowerLevel, ymax=UpperLevel))+
+  geom_pointrange(aes (color = EducationLevel, shape=EducationLevel), size=1) + 
+  geom_errorbar(aes (color = EducationLevel), width=0.5) + 
+  geom_hline(yintercept=mean(predicted_grass_lowdens_results$Estimate), linetype="dashed", color = "black") +
+  scale_color_manual(values=c("orchid", "skyblue4", "darkgoldenrod2"))+
+  facet_nested(~ RaceEthnicity + EducationLevel, nest_line = TRUE) + 
+  ylim(0, 15) +
+  theme_bw()+ # sets white background with gray grid marks
+  theme(legend.position = "none", 
+        axis.text.x = element_text(face = "bold", size = 11, angle = 45, vjust = 1.1, hjust=1.2),
+        axis.text.y = element_text(face = "bold", size = 18),
+        strip.text.x = element_text(face = "bold", size = 11),
+        strip.background = element_rect(colour = "black", linewidth = 1) , 
+        axis.title.y = element_text(face = "bold", angle = 0, vjust = 0.5, size = 18),
+        axis.title.x = element_text(face = "bold", size = 18)) + 
+  labs(x = "Neighborhood SES", y = "%\n Predicted\n Grass") 
+#labs(title="A. Low Population Density (N=2,873)",
+#  x = "Neighborhood SES", y = "% Predicted Total Greenness") 
+#theme(plot.title = ggtext::element_markdown())
+#labs(title="Figure 3a. Predicted mean percent street-view of measures of greenness for those in low population density area
+#(<7,500 people per square mile) with 95% CIs across intersectional strata in the simple intersectional model.",
+#     x = "Neighborhood Deprivation", y = "% Total Street View Greenness")  
+
+grass_lowdens 
+
+grass_highdens <- ggplot(data=predicted_grass_highdens_results, aes((reorder(x = NSES, desc(NSES))), y = Estimate, ymin=LowerLevel, ymax=UpperLevel))+
+  geom_pointrange(aes (color = EducationLevel, shape=EducationLevel), size=1) + 
+  geom_errorbar(aes (color = EducationLevel), width=0.5) + 
+  geom_hline(yintercept=mean(predicted_grass_highdens_results$Estimate), linetype="dashed", color = "black") +
+  scale_color_manual(values=c("orchid", "skyblue4", "darkgoldenrod2"))+
+  facet_nested(~ RaceEthnicity + EducationLevel, nest_line = TRUE) + 
+  ylim(0, 15) +
+  theme_bw()+ # sets white background with gray grid marks
+  theme(legend.position = "none", 
+        axis.text.x = element_text(face = "bold", size = 11, angle = 45, vjust = 1.1, hjust=1.2),
+        axis.text.y = element_text(face = "bold", size = 18),
+        strip.text.x = element_text(face = "bold", size = 11),
+        strip.background = element_rect(colour = "black", linewidth = 1) , 
+        axis.title.y = element_text(face = "bold", angle = 0, vjust = 0.5, size = 18),
+        axis.title.x = element_text(face = "bold", size = 18)) + 
+  labs(x = "Neighborhood SES", y = "%\n Predicted\n Grass") 
+#labs(title = "Figure 3b. Predicted mean percent street-view of measures of greenness for those in **high population** density area \n
+#(>7,500 people per square mile) with 95% CIs across intersectional strata in the simple intersectional model.", 
+#     x = "Neighborhood Deprivation", y = "% Total Street View Greenness") 
+
+grass_highdens 
+
 
 ## Supp fig for log normal model: total greens --------
 greentotal_ln <- ggplot(data=predicted_greentotal_results_ln, aes((reorder(x = NSES, desc(NSES))), y = Estimate, ymin=LowerLevel, ymax=UpperLevel))+
