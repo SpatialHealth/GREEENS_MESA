@@ -122,7 +122,9 @@ for(i in 1:nrow(gsv_dict)){
   colnames(long_df) <- sub(paste0(gsv_dict[i,1], '_'), paste0(gsv_dict[i,2], '_'), colnames(long_df), fixed = T)
 }
 
-
+glimpse(long_df)
+long_df %>% 
+  count(idno)
 ### 4. Export Data -------------------------------------------------------------
 # 
 glimpse(long_df) # 52,752 rows

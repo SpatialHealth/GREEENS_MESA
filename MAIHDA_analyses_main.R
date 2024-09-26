@@ -72,6 +72,7 @@ head(gsv_2000_thru_2002_analysis_measures_avgd,50) %>%
 gsv_2000_thru_2002_ids_only <- gsv_2000_thru_2002_analysis_measures_avgd %>% 
   dplyr::select(idno)
 glimpse(gsv_2000_thru_2002_ids_only)
+n_distinct(gsv_2000_thru_2002_ids_only$idno) # 7536 
 
 ## MESA exam 1 data -----
 mesa_exam1 <- read_sas("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/data/MESAe1FinalLabel20220125.sas7bdat")
@@ -79,11 +80,26 @@ glimpse(mesa_exam1) # 6,814 obs --> not sure how there are more GSV rows (see ab
 
 mesa_exam1_ids_only <- mesa_exam1 %>% 
   dplyr::select(idno)
-glimpse(mesa_exam1_ids_only)
+glimpse(mesa_exam1_ids_only) 
+n_distinct(mesa_exam1_ids_only$idno) # 6814
+7536 - 6814 # 722 diff
+
 
 ### check of ids in GSV data NOT in MESA data ------
-mesa_exam1_gsv_antijoin <- anti_join(gsv_2000_thru_2002_ids_only, mesa_exam1_ids_only, by="idno")
-glimpse(mesa_exam1_gsv_antijoin) # 745 (doesn't add up quite: 7536 - 6,814 = 722)
+in_gsv_not_in_mesa <- anti_join(gsv_2000_thru_2002_ids_only, mesa_exam1_ids_only, by="idno")
+glimpse(in_gsv_not_in_mesa) # 745 (doesn't add up quite: 7536 - 6,814 = 722)
+
+in_mesa_not_in_gsv <- anti_join(mesa_exam1_ids_only, gsv_2000_thru_2002_ids_only, by="idno")
+glimpse(in_mesa_not_in_gsv) # 23 
+
+readr::write_csv(x = in_gsv_not_in_mesa,
+                 file = paste0("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/data/in_gsv_not_in_mesa.csv"),
+                 num_threads = 3) # adding option param to change NA to.
+
+readr::write_csv(x = in_mesa_not_in_gsv,
+                 file = paste0("/Users/tinlizzy/Documents/professional/career/BUSPH/GREEENS and ESIcog/Green space project/data/in_mesa_not_in_gsv.csv"),
+                 num_threads = 3) # adding option param to change NA to.
+
 
 ### subset to vars of interest -----
 mesa_exam1_sm <- mesa_exam1 %>% 
@@ -190,6 +206,7 @@ mesa_gsv$gender1 <- factor(mesa_gsv$gender1)
 mesa_gsv$educ_3cat <- factor(mesa_gsv$educ_3cat)
 mesa_gsv$site1c <- factor(mesa_gsv$site1c)
 mesa_gsv$income1 <- factor(mesa_gsv$income1)
+mesa_gsv$income_4cat <- factor(mesa_gsv$income_4cat)
 
 ##check site counts
 mesa_gsv %>% 
@@ -314,7 +331,7 @@ race_edu_depr_strata %>%  # just swap levels in/out for counts
 ### 2a.i: % total greenness, Simple intersectional  -----------------------------------------
 ### Bayesian MLM for simple intersectional model 
 glimpse(race_edu_depr_strata) # 5,858 ppl
-model1_race_edu_f1_greentotal <- brm(green_total~1+age1c+gender1+income1+site1c+(1|strata),
+model1_race_edu_f1_greentotal <- brm(green_total~1+age1c+gender1+income_4cat+site1c+(1|strata),
                                      data = race_edu_depr_strata,
                                      warmup = 5000,
                                      iter = 10000,
@@ -347,7 +364,7 @@ model1_race_edu_f1_greentotal # 5858
 #model1_race_edu_f1_greentotalNST # yeah runs but the values of distrib, and thus the estimates, are entirely diff
 
 # trying out with log-normal, link identity 
-model1_race_edu_f1_greentotal_ln <- brm(green_total~1+age1c+gender1+income1+site1c+(1|strata),
+model1_race_edu_f1_greentotal_ln <- brm(green_total~1+age1c+gender1+income_4cat+site1c+(1|strata),
                                         data = race_edu_depr_strata,
                                        family = "lognormal",
                                         warmup = 5000,
@@ -372,7 +389,7 @@ any(model1_race_edu_f1_greentotal.rhats > 1.1) # false indicates convergence goo
 any(model1_race_edu_f1_greentotal.rhats > 1.05) # false indicates convergence good
 
 ### 2a.ii: % trees only, Simple intersectional  -----------------------------------------
-model1_race_edu_f1_trees <- brm(tree_total~1+age1c+gender1+income1+site1c+(1|strata),
+model1_race_edu_f1_trees <- brm(tree_total~1+age1c+gender1+income_4cat+site1c+(1|strata),
                                 data = race_edu_depr_strata,
                                 warmup = 5000,
                                 iter = 10000,
@@ -394,7 +411,7 @@ any(model1_race_edu_f1_trees.rhats > 1.1) # FALSE = convergence good
 any(model1_race_edu_f1_trees.rhats > 1.05) # FALSE = convergence good
 
 ### 2a.iii:  % grass only, Simple intersectional  -----------------------------------------
-model1_race_edu_f1_grass <- brm(grass~1+age1c+gender1+income1+site1c+(1|strata),
+model1_race_edu_f1_grass <- brm(grass~1+age1c+gender1+income_4cat+site1c+(1|strata),
                                 data = race_edu_depr_strata,
                                 warmup = 5000,
                                 iter = 10000,
@@ -416,7 +433,7 @@ any(model1_race_edu_f1_grass.rhats > 1.1) # convergence good
 any(model1_race_edu_f1_grass.rhats > 1.05) # convergence good
 
 ### 2a.iv:  % other greenness, Simple intersectional  -----------------------------------------
-model1_race_edu_f1_green_other <- brm(green_other~1+age1c+gender1+income1+site1c+(1|strata),
+model1_race_edu_f1_green_other <- brm(green_other~1+age1c+gender1+income_4cat+site1c+(1|strata),
                                 data = race_edu_depr_strata,
                                 warmup = 5000,
                                 iter = 10000,
@@ -438,7 +455,7 @@ any(model1_race_edu_f1_green_other.rhats > 1.1) # convergence good
 any(model1_race_edu_f1_green_other.rhats > 1.05) # convergence good
 
 ### 2b.i: % total greenness, interactional model -----------------------------------------
-model2_race_edu_f1_greentotal <- brm(green_total~1+relevel(race1c,ref="3")+educ_3cat+ndepr_reord+age1c+gender1+income1+site1c+(1|strata),
+model2_race_edu_f1_greentotal <- brm(green_total~1+relevel(race1c,ref="3")+educ_3cat+ndepr_reord+age1c+gender1+income_4cat+site1c+(1|strata),
                                      data = race_edu_depr_strata,
                                      warmup = 5000,
                                      iter = 10000,
@@ -448,7 +465,7 @@ model2_race_edu_f1_greentotal
 
 ### 2b.ii: % trees only, interactional model -----------------------------------------
 
-model2_race_edu_f1_trees <- brm(tree_total~1+relevel(race1c,ref="3")+educ_3cat+ndepr_reord+age1c+gender1+income1+site1c+(1|strata),
+model2_race_edu_f1_trees <- brm(tree_total~1+relevel(race1c,ref="3")+educ_3cat+ndepr_reord+age1c+gender1+income_4cat+site1c+(1|strata),
                                 data = race_edu_depr_strata,
                                 warmup = 5000,
                                 iter = 10000,
@@ -458,7 +475,7 @@ model2_race_edu_f1_trees
 
 ### 2b.iii: % grass only, interactional model -----------------------------------------
 
-model2_race_edu_f1_grass <- brm(grass~1+relevel(race1c,ref="3")+educ_3cat+ndepr_reord+age1c+gender1+income1+site1c+(1|strata),
+model2_race_edu_f1_grass <- brm(grass~1+relevel(race1c,ref="3")+educ_3cat+ndepr_reord+age1c+gender1+income_4cat+site1c+(1|strata),
                                      data = race_edu_depr_strata,
                                      warmup = 5000,
                                      iter = 10000,
@@ -468,7 +485,7 @@ model2_race_edu_f1_grass
 
 ### 2b.iv: % other greenness, interactional model -----------------------------------------
 
-model2_race_edu_f1_green_other <- brm(green_other~1+relevel(race1c,ref="3")+educ_3cat+ndepr_reord+age1c+gender1+income1+site1c+(1|strata),
+model2_race_edu_f1_green_other <- brm(green_other~1+relevel(race1c,ref="3")+educ_3cat+ndepr_reord+age1c+gender1+income_4cat+site1c+(1|strata),
                                 data = race_edu_depr_strata,
                                 warmup = 5000,
                                 iter = 10000,
@@ -498,13 +515,13 @@ round(12.96/ (12.96 + 59.7529)*100,2) # 17.82%
 model1_race_edu_f1_trees
 
 # Variance at race x edu strata strata level model 1 (sd intercept estimate)^2
-2.73 ^2 # 7.4529
+2.74 ^2 # 7.5076
 
 # Variance at individual level model 1 (fam specific params sigma)^2
-6.17^2 # 38.0689
+6.18^2 # 38.1924
 
 # Calculate VPC model 1
-round(7.4529/ (7.4529 + 38.0689)*100,2) # 16.37%
+round(7.5076/ (7.5076 + 38.1924)*100,2) # 16.43%
 
 ### 3c. % grass only  -----------------------------------------
 # Check results
@@ -615,21 +632,21 @@ round(((12.96-5.1076)/12.96)*100,2) # PCV = 60.59%
 ### trees ####
 model2_race_edu_f1_trees
 # Variance at strata level model 2 (sd intercept estimate)^2
-1.42^2 # 2.0164
+1.41^2 # 1.9881
 
 # Variance at individual level model 2 (fam specific params sigma)^2
-6.17^2 # 38.0689
+6.18^2 # 38.1924
 
 # Calculate adjusted VPC model 2
-round(2.0164 / (2.0164 + 38.0689)*100,2) # 5.03%
+round(1.9881 / (1.9881 + 38.1924)*100,2) # 4.95%
 
 # get strata level variance from null model 1
 model1_race_edu_f1_trees 
-2.73^2 # 7.4529
+2.74^2 # 7.5076
 # Proportional Change in Variance (PCV) = Assessment of the extent to which between-stratum 
 # inequalities are explained by additive vs. interactive/residual effects
 # i.e. percentage of between-strata variance that cannot be explained by main effects (in %):
-round(((7.4529-2.0164)/7.4529)*100,2) # 72.94
+round(((7.5076-1.9881)/7.5076)*100,2) # 73.52
 100 - round(((7.4529-2.0164)/7.4529)*100,2) # 27.06
 
 ### grass ####
@@ -638,10 +655,10 @@ model2_race_edu_f1_grass
 0.77^2 # 0.5929
 
 # Variance at individual level model 2 (fam specific params sigma)^2
-2.43^2 # 5.9049
+2.44^2 # 5.9536
 
 # Calculate adjusted VPC model 2
-round(0.5929 / (0.5929 + 5.9049)*100,2) # 9.12%
+round(0.5929 / (0.5929 + 5.9536)*100,2) # 9.06%
 
 # get null model strata variance
 model1_race_edu_f1_grass

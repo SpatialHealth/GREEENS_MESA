@@ -110,6 +110,7 @@ for(i in 1:nrow(gsv_dict)){
 }
 
 glimpse(long_df)
+n_distinct(long_df$idno) # 7345
 long_df %>% 
   summarise_all(~ sum(is.na(.))) # note there's a fair bit of missingness in these measures
 ### 4. Export Data #############################################################
